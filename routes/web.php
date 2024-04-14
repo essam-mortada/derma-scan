@@ -15,17 +15,9 @@ Route::group(['middleware' => 'auth'],function () {
 
     Route::post('/logout', 'App\Http\Controllers\userController@logout')->name('logout');
 
-});
-
-//user
-Route::get('/register', 'App\Http\Controllers\userController@showRegistrationForm')->name('register');
-Route::post('/register', 'App\Http\Controllers\userController@register');
-
-Route::get('/login', 'App\Http\Controllers\userController@showLoginForm')->name('login');
-Route::post('/login', 'App\Http\Controllers\userController@login');
-
+    
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//doctor
+
 
 
 Route::post('/user/{id}', 'App\Http\Controllers\adminController@deleteUser')->name('user.delete');
@@ -48,4 +40,11 @@ Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.
 
 //comments
 Route::post('/comment', [commentController::class, 'store'])->name('comment.store');
-Route::get('posts/{postId}/comments', [commentController::class, 'showCommentsByPost'])->name('posts.comments');
+});
+
+//user
+Route::get('/register', 'App\Http\Controllers\userController@showRegistrationForm')->name('register');
+Route::post('/register', 'App\Http\Controllers\userController@register');
+
+Route::get('/login', 'App\Http\Controllers\userController@showLoginForm')->name('login');
+Route::post('/login', 'App\Http\Controllers\userController@login');

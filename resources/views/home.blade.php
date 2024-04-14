@@ -22,7 +22,7 @@
                                                 <div class="timeline-body">
                                                     <div class="timeline-header">
                                                         <span class="userimage">
-                                                            <img src="{{ asset("storage/app/$post->user->profile_picture")}}" alt="">
+                                                            <img src="{{ asset('../storage/app/'. $post->user->profile_picture)}}" alt="">
                                                         </span>
                                                         <span class="username">
                                                             {{ $post->user->display_name }}
@@ -46,7 +46,7 @@
                                                             @if ($comment->post_id == $post->id)
                                                             <div class="timeline-header">
                                                                 <span class="userimage">
-                                                                    <img src="{{ asset("storage/app/$comment->user->profile_picture")}}" alt="">
+                                                                    <img src="{{ asset("../storage/app/$comment->user->profile_picture")}}" alt="">
                                                                 </span>
                                                                 <span class="username">
                                                                     {{ $comment->user->display_name }}

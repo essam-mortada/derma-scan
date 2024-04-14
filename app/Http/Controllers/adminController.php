@@ -30,6 +30,9 @@ class adminController extends Controller
     if ($user->profile_picture && file_exists(storage_path('../storage/app/' . $user->profile_picture))) {
         unlink('../storage/app/'.  $user->profile_picture);
     }
+    if ($user->medical_license && file_exists(storage_path('../storage/app/' . $user->medical_license))) {
+        unlink('../storage/app/'.  $user->medical_license);
+    }
 
     // Delete the doctor record
     $user->delete();

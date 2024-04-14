@@ -5,7 +5,7 @@
         <div class="row mt-5 text-center justify-content-center">
            
             <div class="col-md-4">
-                <a href="{{ route('login') }}" class="btn btn-primary btn-block">Login as User</a>
+                <a href="{{ route('login') }}" class="btn btn-primary btn-block">Login</a>
             </div>
         </div>
     </div>
