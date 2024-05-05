@@ -13,7 +13,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('posts.create') }}">Posts</a>
                 </li>
-                <!-- Add more nav items as needed -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('users.show', Auth::user()->id) }}">profile</a>
+                </li>
             </ul>
             <ul class="navbar-nav ml-auto">
                 @guest

@@ -51,19 +51,40 @@ class commentController extends Controller
 
     public function edit(Comment $comment)
     {
-        //
+        return view('comment-edit', compact('comment'));
+
     }
     
     public function update(Request $request, Comment $comment)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'comment_content' => 'required|string',
+            'post_id' => 'required|integer'
+        ]);
+        $validator->after(function ($validator) use ($request) {
+            $request->merge([
+                'comment_content' => strip_tags($request->comment_content),
+            ]);
+        });
+        $comment->update($request->all());
+        
+    
+        return redirect()->route('home');
     }
     
     public function destroy(Comment $comment)
     {
-        $comment = comment::findOrFail($comment->id); 
-        $comment->delete();
-    return redirect()->back()->with('success', 'post deleted successfully.');
 
+    $comment = comment::findOrFail($comment->id); 
+    // Check if the user is authorized to delete the comment
+    if ($comment->user_id!= auth()->id()) {
+        return redirect()->back()->with('error', 'You are not authorized to delete this comment.');
+    }
+
+    // Delete the comment
+    $comment->delete();
+
+    // Redirect back to the post
+    return redirect()->back()->with('success', 'Comment deleted successfully.');
     }
 }

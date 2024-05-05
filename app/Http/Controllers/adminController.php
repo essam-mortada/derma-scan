@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\admin;
-use App\Models\Doctor;
+use App\Models\Post;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator ;
 use Illuminate\Validation\Validator as ValidationValidator;
 
@@ -16,22 +16,53 @@ class adminController extends Controller
 
     public function showHome()
     {
-        $users = User::all();
 
         return view('admin.admin-home', compact('users', 'doctors'));
     }
 
+    public function showPosts()
+    {
+        $posts= Post::all();
+        return view('admin.posts', compact('posts'));
+    }
 
+    public function showUsers()
+    {
+        $users= User::all();
+        return view('admin.users', compact('users'));
+    }
 
+    public function showDoctors()
+    {
+    
+        $users = user::where('status','pending')->get();
+    
+        return view('admin.doctor-requests', compact('users'));
+    }
+
+    public function deletePost(Post $post)
+    {
+       
+    $post = Post::findOrFail($post->id); 
+    
+
+    if ($post->attachments && file_exists(asset('storage/' . $post->attachments))) {
+        unlink(asset('storage/'.  $post->attachments));
+    }
+
+    // Delete the doctor record
+    $post->delete();
+    return redirect()->back()->with('success', 'post deleted successfully.');
+    }  
 
     public function deleteUser(Request $request, $id)
     {
     $user = User::findOrFail($id);
-    if ($user->profile_picture && file_exists(storage_path('../storage/app/' . $user->profile_picture))) {
-        unlink('../storage/app/'.  $user->profile_picture);
+    if ($user->profile_picture && file_exists(asset('storage/' . $user->profile_picture))) {
+        unlink(asset('storage/'.  $user->profile_picture));
     }
-    if ($user->medical_license && file_exists(storage_path('../storage/app/' . $user->medical_license))) {
-        unlink('../storage/app/'.  $user->medical_license);
+    if ($user->medical_license && file_exists(asset('storage/' . $user->medical_license))) {
+        unlink(asset('storage/'.  $user->medical_license));
     }
 
     // Delete the doctor record
@@ -48,7 +79,11 @@ class adminController extends Controller
     {
         return view('admin/add-admin');
     }
+    public function edit(User $user)
+    {
+        return view('admin/admin-edit', compact('user'));
 
+    }
     public function addAdmin(Request $request)
     {
         // Validate user input
@@ -100,7 +135,61 @@ class adminController extends Controller
     }
 
     
+    public function update(Request $request, User $user)
+    {
+        $validator= Validator::make($request->all() ,[
+            'name' => 'required|string|max:255|alpha_dash',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed|alpha_dash',
+            'display_name' => 'required|string|max:20|alpha_dash',
+            'gender'=> 'required|string',
+            'profile_picture' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+        $validator->after(function ($validator) use ($request) {
+            $request->merge([
+                'name' => strip_tags($request->name),
+                'email' => strip_tags($request->email),
+                'password' => strip_tags($request->password),
+                'display_name' => strip_tags($request->display_name),
+            ]);
+        });
+        $user->update($request->all());
+        if ($request->hasFile('profile_picture')) {
+            // Remove the old picture from storage
+            if ($user->profile_picture) {
+                Storage::disk('public')->delete($user->profile_picture);
+            }
+    
+            $profilePicture = $request->file('profile_picture');
+            $profilePictureName = time(). '_'. $profilePicture->getClientOriginalName();
+            $profilePicturePath = $profilePicture->storeAs('profile_pictures', $profilePictureName,'public');
+            $user->profile_picture = $profilePicturePath;
+            $user->save();
+        }
+        if ($request->has('password')) {
+            $user->password = Hash::make($request->password);
+            $user->save();
+        }
+        
+        
+    
+        return redirect()->route('home');    
+    }
 
 
+
+    public function approve(User $user)
+    {
+        $user->update(['status' => 'approved']);
+    
+        return redirect()->back()->with('success', 'User approved successfully.');
+    }
+    
+    public function decline(User $user)
+    {
+        $user->update(['status' => 'declined']);
+    
+        return redirect()->back()->with('success', 'User declined successfully.');
+    }
     
 }

@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\comment;
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 use function Symfony\Component\Clock\now;
@@ -15,15 +17,7 @@ class PostController extends Controller
     /**
      * Display a listing of the post.
      */
-    public function index()
-    {
-        $posts = Post::all();
-        $comments = [];
-        foreach ($posts as $post) {
-            $comments[$post->id] = $post->comments; // Assuming you have defined the relationship in the Post model
-        }
-        return view('home', compact('posts', 'comments'));
-    }
+    
     
     public function showCommentsByPost($postId)
     {
@@ -52,11 +46,20 @@ class PostController extends Controller
             'post_type' => 'required|nullable|string|alpha_dash',
             
         ]);
+        $validator->after(function ($validator) use ($request) {
+            $request->merge([
+                'user_id' => strip_tags($request->user_id),
+                'post_text' => strip_tags($request->post_text),
+                'attachments' => strip_tags($request->attachments),
+                'post_type' => strip_tags($request->post_type),
+                'privacy' => strip_tags($request->post_type),
+            ]);
+        });
         $postPicturePath = null;
         if ($request->hasFile('attachments')) {
             $postPicture = $request->file('attachments');
             $postPictureName = time() . '_' . $postPicture->getClientOriginalName();
-            $postPicturePath = $postPicture->storeAs('post_pictures', $postPictureName);
+            $postPicturePath = $postPicture->storeAs('post_pictures', $postPictureName,'public');
         }
         $post = new Post();
         $post->user_id = auth()->user()->id ?? $request->user_id; 
@@ -71,13 +74,47 @@ class PostController extends Controller
         return redirect()->route('home');    
     }
 
+    public function upvote(Request $request, $postId)
+    {
+        $post = Post::find($postId);
+        $post->upvotes++;
+        $post->save();
+
+        return redirect()->back()->with('success', 'Post upvoted successfully.');
+    }
+
+    public function downvote(Request $request, $postId)
+    {
+        $post = Post::find($postId);
+        $post->downvotes++;
+        $post->save();
+
+        return redirect()->back()->with('success', 'Post downvoted successfully.');
+    }
+
+
     /**
      * Display the specified post.
      */
     public function show(Post $post)
-    {
-        //
+{
+    // Retrieve the post
+    $post = Post::find($post->id);
+
+    // Check if the post exists
+    if (!$post) {
+        return redirect()->route('home')->with('error', 'Post not found.');
     }
+    $postImage = null;
+    if ($post->attachments) {
+        $postImage = Storage::url($post->attachments);
+    }
+    // Retrieve the comments for the post
+    $comments = $post->comments;
+
+    // Pass the post and comments to the view
+    return view('posts.show', compact('post', 'comments','postImage'));
+}
 
     /**
      * Show the form for editing the specified post.
@@ -93,26 +130,34 @@ class PostController extends Controller
      */
     public function update(Request $request, Post $post)
     {
-        $request->validate($request, [
+        $validator= Validator::make($request->all() ,[
             'post_text' => 'required|string',
             'attachments' => 'nullable|string',
             'privacy' => 'required|string',
-            'post_type' => 'required|string',
-            'date' => 'required|date',
-            'time' => 'required|time',
+           
         ]);
-    
+        $validator->after(function ($validator) use ($request) {
+            $request->merge([
+                'post_text' => strip_tags($request->post_text),
+                'attachments' => strip_tags($request->attachments),
+                'privacy' => strip_tags($request->post_type),
+            ]);
+        });
         $post->update($request->all());
     
-        return redirect()->route('posts.index');    }
+        return redirect()->route('home');    }
 
     /**
      * Remove the specified post from storage.
      */
     public function destroy(Post $post)
     {
-        
+       
     $post = Post::findOrFail($post->id); 
+    if ($post->user_id!= auth()->id()) {
+        return redirect()->back()->with('error', 'You are not authorized to delete this post.');
+    }
+
     if ($post->attachments && file_exists(storage_path('../storage/app/' . $post->attachments))) {
         unlink('../storage/app/'.  $post->attachments);
     }
@@ -120,6 +165,17 @@ class PostController extends Controller
     // Delete the doctor record
     $post->delete();
     return redirect()->back()->with('success', 'post deleted successfully.');
-    }  
+    } 
+    
+    
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+    
+        $posts = Post::where('post_text', 'like', "%{$query}%")
+            ->paginate(10);
+    
+        return view('admin.posts', compact('posts', 'query'));
+    }
   }
 

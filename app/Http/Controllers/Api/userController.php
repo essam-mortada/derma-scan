@@ -1,64 +1,76 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\comment;
 use App\Models\Post;
+use Illuminate\Http\Request;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Stevebauman\Location\Facades\Location as FacadesLocation;
 
-class userController extends Controller
+class UserController extends Controller
 {
-    public function showHome()
+
+    public function showHome(Request $request)
 {
     if (Auth::check()) {
         $posts = Post::all();
         $comments = comment::all();
         $users = User::all();
         $user = Auth::user();
-        if ($user->type == 'user') {
-            return view('home',compact('posts','comments','user'));
-        } elseif ($user->type == 'doctor') {
-            return view('home',compact('posts','comments','user'));
-        } elseif ($user->type == 'admin') {
-            return view('admin.admin-home',compact('posts','users'));
-        } 
         
-        else{
-            return redirect()->route('login');
+        if ($user->type == 'user' || $user->type == 'doctor') {
+            return response()->json(['posts' => $posts, 'comments' => $comments, 'user' => $user]);
+        } elseif ($user->type == 'admin') {
+            return response()->json(['posts' => $posts, 'users' => $users]);
+        } else {
+            return response()->json(['message' => 'Invalid user type'], 403);
         }
     } else {
-        return redirect()->route('login');
+        return response()->json(['message' => 'User not authenticated'], 401);
     }
 }
 
-    /**
-     * Display the registration form.
-     *
-     * @return \Illuminate\View\View
-     */
-    public function showRegistrationForm()
+public function getAllData()
     {
-        return view('register');
+        if (Auth::check()) {
+            $posts = Post::all();
+            $comments = Comment::all();
+            $users = User::all();
+            $user = Auth::user();
+
+            return response()->json([
+                'posts' => $posts,
+                'comments' => $comments,
+                'users' => $users,
+                'authenticated_user' => $user,
+            ]);
+        } else {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
     }
-    public function showLoginForm()
+
+
+    public function index()
     {
-        return view('login');
+        // Retrieve all users
+        $users = User::all();
+
+        // Return users as JSON response
+        return response()->json($users);
     }
-    
-    /**
-     * Handle user registration.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function register(Request $request)
+
+    public function show(User $user)
+    {
+        // Return the specified user as JSON response
+        return response()->json($user);
+    }
+
+    public function store(Request $request)
     {
         // Validate user input
         $validator = Validator::make($request->all(), [
@@ -71,7 +83,6 @@ class userController extends Controller
             'type'=> 'in:user,admin,doctor|required|string|alpha_dash',
             'medical_license' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
 
-
         ]);
         $validator->after(function ($validator) use ($request) {
             $request->merge([
@@ -81,11 +92,9 @@ class userController extends Controller
                 'display_name' => strip_tags($request->display_name),
             ]);
         });
-
         if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
+            return response()->json(['errors' => $validator->errors()], 400);
         }
-
         $profilePicturePath = null;
         if ($request->hasFile('profile_picture')) {
             $profilePicture = $request->file('profile_picture');
@@ -99,10 +108,6 @@ class userController extends Controller
             $medicalLicensePath = $medicalLicense->storeAs('medical_licenses', $medicalLicenseName,'public');
         }
 
-        
-            
-        
-        
         // Create a new user
         $user = new User();
         $user->name = $request->name;
@@ -117,76 +122,14 @@ class userController extends Controller
         }
         $user->password = Hash::make($request->password);
         $user->save();
-
-       
-        return redirect()->route('login')->with('success', 'Registration successful. Please login.');
-    }
-
-
-    public function login(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-
-        $credentials = $request->only('email', 'password');
-
-        if (Auth::attempt($credentials, $request->remember)) {
-            return redirect()->intended('home');
-        }
-
-        return redirect()->back()->withInput($request->only('email', 'remember'))->withErrors([
-            'email' => 'These credentials do not match our records.',
-        ]);
-    }
-
-    public function logout(Request $request)
-    {
-        Auth::logout();
-
-        $request->session()->invalidate();
-
-        $request->session()->regenerateToken();
-
-        return redirect()->route('login');
-    }
-
-
-    public function show(User $user)
-{
-    // Retrieve the user
-    $user = User::find($user->id);
-
-    // Check if the user exists
-    if (!$user) {
-        return redirect()->route('home')->with('error', 'User not found.');
-    }
-
-    $userImage = null;
-    if ($user->profile_picture) {
-        $userImage = Storage::url($user->profile_picture);
-    }
-    // Retrieve the user's posts
-    $posts = $user->posts;
-
-    // Retrieve the user's comments
-    $comments = $user->comments;
-
-    // Pass the user, posts, and comments to the view
-    return view('profile', compact('user', 'posts', 'comments'));
-}
-
-    public function edit(User $user)
-    {
-        return view('profile-edit', compact('user'));
-
+        // Return success message as JSON response
+        return response()->json(['message' => 'User created successfully'], 201);
     }
 
     public function update(Request $request, User $user)
     {
         $validator= Validator::make($request->all() ,[
-            'name' => 'required|string|max:255|alpha_dash',
+            'name' => 'required|string|max:255|',
             'email' => 'required|string|email|max:255|exists:users',
             'password' => 'required|string|min:8|confirmed|alpha_dash',
             'display_name' => 'required|string|max:20|alpha_dash',
@@ -202,10 +145,15 @@ class userController extends Controller
             ]);
         });
         $user->update($request->all());
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
+
+        // Update the user
         if ($request->hasFile('profile_picture')) {
             // Remove the old picture from storage
             if ($user->profile_picture) {
-                Storage::disk('public')->delete($user->profile_picture);
+                Storage::delete($user->profile_picture);
             }
     
             $profilePicture = $request->file('profile_picture');
@@ -218,22 +166,34 @@ class userController extends Controller
             $user->password = Hash::make($request->password);
             $user->save();
         }
-        
-        
-    
-        return redirect()->route('users.show',$user);    
+
+        // Return success message as JSON response
+        return response()->json(['message' => 'User updated successfully']);
     }
 
+    
 
-    public function search(Request $request)
+
+    public function login(Request $request)
     {
-        $query = $request->input('query');
-    
-        $users = user::where('display_name', 'like', "%{$query}%")
-            ->paginate(10);
-    
-        return view('admin.users', compact('users', 'query'));
+    // Validate user input
+    $validator = Validator::make($request->all(), [
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json(['errors' => $validator->errors()], 400);
     }
+
+    // Attempt to authenticate the user
+    if (Auth::attempt($request->only('email', 'password'))) {
+        // Authentication successful, return the authenticated user
+        return response()->json(['user' => Auth::user()]);
+    }
+
+    // Authentication failed, return error message
+    return response()->json(['message' => 'Invalid credentials'], 401);
+    }
+
 }
-
-
