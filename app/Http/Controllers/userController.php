@@ -18,7 +18,7 @@ class userController extends Controller
     public function showHome()
 {
     if (Auth::check()) {
-        $posts = Post::all();
+        $posts = Post::orderBy('created_at', 'desc')->get();
         $comments = comment::all();
         $users = User::all();
         $user = Auth::user();

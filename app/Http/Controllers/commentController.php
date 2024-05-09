@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\comment;
 use App\Models\Post;
+use App\Notifications\NewCommentNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Validator;
@@ -34,7 +35,7 @@ class commentController extends Controller
         $comment->user_id = auth()->user()->id;
         $comment->created_at= Date::now(config('app.timezone'))->format('Y-m-d H:i:s');
         $comment->save();
-    
+
         return redirect()->route('home');
     }
     
@@ -86,5 +87,15 @@ class commentController extends Controller
 
     // Redirect back to the post
     return redirect()->back()->with('success', 'Comment deleted successfully.');
+    }
+
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+    
+        $comments = comment::where('comment_content', 'like', "%{$query}%")
+            ->paginate(10);
+    
+        return view('admin.comments', compact('comments', 'query'));
     }
 }

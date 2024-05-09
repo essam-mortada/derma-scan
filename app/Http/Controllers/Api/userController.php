@@ -37,21 +37,23 @@ class UserController extends Controller
 
 public function getAllData()
     {
-        if (Auth::check()) {
+       
             $posts = Post::all();
             $comments = Comment::all();
             $users = User::all();
             $user = Auth::user();
 
             return response()->json([
+                'data'=>
+                [
                 'posts' => $posts,
                 'comments' => $comments,
                 'users' => $users,
                 'authenticated_user' => $user,
+                ]
             ]);
-        } else {
-            return response()->json(['message' => 'User not authenticated'], 401);
-        }
+        
+           
     }
 
 

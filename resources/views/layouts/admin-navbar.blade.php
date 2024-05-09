@@ -14,6 +14,9 @@
             <a class="nav-link" href="{{route('admin.posts')}}">posts</a>
           </li>
           <li class="nav-item">
+            <a class="nav-link" href="{{route('admin.comments')}}">comments</a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link " aria-current="page" href="{{route('admin.users')}}">users</a>
           </li>
           <li class="nav-item">

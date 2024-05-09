@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\comment;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -25,7 +26,11 @@ class adminController extends Controller
         $posts= Post::all();
         return view('admin.posts', compact('posts'));
     }
-
+    public function showComments()
+    {
+        $comments= comment::all();
+        return view('admin.comments', compact('comments'));
+    }
     public function showUsers()
     {
         $users= User::all();
@@ -54,6 +59,16 @@ class adminController extends Controller
     $post->delete();
     return redirect()->back()->with('success', 'post deleted successfully.');
     }  
+
+
+    public function deleteComment(comment $comment)
+    {
+       
+    $comment = comment::findOrFail($comment->id); 
+    $comment->delete();
+    return redirect()->back()->with('success', 'comment deleted successfully.');
+    }  
+
 
     public function deleteUser(Request $request, $id)
     {

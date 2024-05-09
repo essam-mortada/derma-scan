@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\CommentController;
-
+use App\Http\Controllers\chatbotController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -17,7 +17,7 @@ Route::get('/user', function (Request $request) {
     Route::get('/users/show/{user}', [UserController::class, 'show']);
     Route::post('/register', [UserController::class, 'store']);
     Route::post('/users/update/{user}', [UserController::class, 'update']);
-    Route::post('/users/delte/{user}', [UserController::class, 'destroy']);
+    Route::post('/users/delete/{user}', [UserController::class, 'destroy']);
     Route::post('/login', [UserController::class, 'login']);
     Route::get('/home', [UserController::class, 'showHome']);
     Route::get('/all-data', [UserController::class, 'getAllData']);
@@ -36,6 +36,9 @@ Route::get('/user', function (Request $request) {
 
     // comment endpoints
     Route::post('/comments/create', [CommentController::class, 'store']);
-    Route::post('/comments/{comment}', [CommentController::class, 'update']);
-    Route::post('/comments/{comment}', [CommentController::class, 'destroy']);
+    Route::post('/comments/update/{comment}', [CommentController::class, 'update']);
+    Route::post('/comments/delete/{comment}', [CommentController::class, 'destroy']);
     Route::get('comments/post/{postId}', [CommentController::class, 'showCommentsByPost']);
+
+
+    Route::post('/chatbot', [chatbotController::class,'sendMessage']);

@@ -16,6 +16,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('users.show', Auth::user()->id) }}">profile</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('chatbot')}}">chatbot</a>
+                </li>
             </ul>
             <ul class="navbar-nav ml-auto">
                 @guest
