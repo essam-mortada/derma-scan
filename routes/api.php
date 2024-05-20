@@ -21,6 +21,7 @@ Route::get('/user', function (Request $request) {
     Route::post('/login', [UserController::class, 'login']);
     Route::get('/home', [UserController::class, 'showHome']);
     Route::get('/all-data', [UserController::class, 'getAllData']);
+    Route::post('/change-password/{user}', [UserController::class, 'changePassword']);
 
 
     // post endpoints
@@ -29,8 +30,8 @@ Route::get('/user', function (Request $request) {
     Route::post('/posts/create', [PostController::class, 'store']);
     Route::post('/posts/update/{post}', [PostController::class, 'update']);
     Route::post('/posts/delete/{post}', [PostController::class, 'destroy']);
-    Route::post('/posts/{post}/upvote', [PostController::class, 'upvote']);
-    Route::post('/posts/{post}/downvote', [PostController::class, 'downvote']);
+    Route::post('/posts/upvote/{post}', [PostController::class, 'upvote']);
+    Route::post('/posts/downvote/{post}', [PostController::class, 'downvote']);
     Route::get('/posts/{postId}/comments', [PostController::class, 'showCommentsByPost']);
 
 
@@ -41,4 +42,3 @@ Route::get('/user', function (Request $request) {
     Route::get('comments/post/{postId}', [CommentController::class, 'showCommentsByPost']);
 
 
-    Route::post('/chatbot', [chatbotController::class,'sendMessage']);

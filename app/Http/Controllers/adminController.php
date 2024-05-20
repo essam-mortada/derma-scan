@@ -74,10 +74,10 @@ class adminController extends Controller
     {
     $user = User::findOrFail($id);
     if ($user->profile_picture && file_exists(asset('storage/' . $user->profile_picture))) {
-        unlink(asset('storage/'.  $user->profile_picture));
+        unlink('storage/'.  $user->profile_picture);
     }
     if ($user->medical_license && file_exists(asset('storage/' . $user->medical_license))) {
-        unlink(asset('storage/'.  $user->medical_license));
+        unlink('storage/'.  $user->medical_license);
     }
 
     // Delete the doctor record

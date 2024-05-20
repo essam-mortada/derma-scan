@@ -25,7 +25,8 @@ Route::group(['middleware' => 'auth'],function () {
 Route::get('/profile/show/{user}', [userController::class, 'show'])->name('users.show');
 Route::get('/profile/{user}/edit', [userController::class, 'edit'])->name('users.edit');
 Route::put('/profile/{user}', [userController::class, 'update'])->name('users.update');
-
+Route::get('/change-password/{user}', [UserController::class, 'showChangePasswordForm'])->name('password.change.form');
+Route::post('/change-password/{user}', [UserController::class, 'changePassword'])->name('password.change');
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //admin
 /////////////////////////////////////////////////////////////////////////////////////////////////

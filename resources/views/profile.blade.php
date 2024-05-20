@@ -20,6 +20,8 @@
         </div>
         @if ($user->id==Auth::user()->id)            
         <a class="btn btn-primary float-end" href="{{route('users.edit',$user->id)}}">edit profile</a>
+        <a class="btn btn-primary float-end" href="{{ route('password.change.form', Auth::user()->id) }}">Change Password</a>
+
         @endif
 
         <div class="img mt-5" style="    background-image: linear-gradient(150deg, rgba(63, 174, 255, .3)15%, rgba(63, 174, 255, .3)70%, rgba(63, 174, 255, .3)94%),height: 350px;background-size: cover;"></div>
@@ -65,7 +67,7 @@
                     <div class="card-body">
                         <div class="tab-content" id="myTabContent">
                             <div class="tab-pane fade active show" id="posts" role="tabpanel" aria-labelledby="posts-tab">
-                               <form action="{{route('posts.create')}}" method="POST">
+                               <form action="{{route('posts.store')}}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 <div class="form-group">
                                     <div class="custom-file">
@@ -78,7 +80,7 @@
                                     </div>
                                     <label class="sr-only" for="message">post</label>
                                     <textarea class="form-control" id="message" rows="3" name="post_text" placeholder="What are you thinking?"></textarea>
-                                    @error('post_test')
+                                    @error('post_text')
                                     <div class="text-danger">{{ $message }}</div>
                                 @enderror
                                     <div class="form-group">
@@ -103,16 +105,17 @@
                                         @enderror
                                     </div>
                                 </div>
+                            </div>
+                            <div class="btn-toolbar justify-content-between">
+                                <div class="btn-group">
+                                    <button type="submit" class="btn btn-primary">share</button>
+                                </div>
+                              
+                            </div>
                             </form>
                             </div>
                            
-                        </div>
-                        <div class="btn-toolbar justify-content-between">
-                            <div class="btn-group">
-                                <button type="submit" class="btn btn-primary">share</button>
-                            </div>
-                          
-                        </div>
+                        
                     </div>
                 </div>
                 @endif

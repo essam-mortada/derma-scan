@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\comment;
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -37,7 +38,7 @@ class PostController extends Controller
         // Validate the request data
         $validator = Validator::make($request->all(), [
             'post_text' => 'required|string',
-            'attachments' => 'nullable|string',
+            'attachments' => 'nullable',
             'privacy' => 'required|string',
             'post_type' => 'required|string',
 
@@ -48,11 +49,23 @@ class PostController extends Controller
             return response()->json(['errors' => $validator->errors()], 400);
         }
 
+        $user = Auth::guard('api')->user(); // Authenticate using the 'api' guard
+
+        // Check if the user is authenticated
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+        $postPicturePath = null;
+        if ($request->hasFile('attachments')) {
+            $postPicture = $request->file('attachments');
+            $postPictureName = time() . '_' . $postPicture->getClientOriginalName();
+            $postPicturePath = $postPicture->storeAs('post_pictures', $postPictureName,'public');
+        }
         // Create a new post
         $post = new Post();
-        $post->user_id = Auth::id();
+        $post->user_id = $user->id;;
         $post->post_text = $request->post_text;
-        $post->attachments = $request->attachments;
+        $post->attachments = $postPicturePath;
         $post->privacy = $request->privacy;
         $post->post_type = $request->post_type;
         $post->save();
@@ -66,10 +79,18 @@ class PostController extends Controller
      */
     public function update(Request $request, Post $post)
     {
+        $user = Auth::guard('api')->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
+        if ($post->user_id!= $user->id) {
+            return response()->json(['message'=>'You are not authorized to update this post.']);
+        }
         // Validate the request data
         $validator = Validator::make($request->all(), [
             'post_text' => 'required|string',
-            'attachments' => 'nullable|string',
+            'attachments' => 'nullable',
             'privacy' => 'required|string',
             'post_type' => 'required|string',
         ]);
@@ -91,7 +112,12 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-        if ($post->user_id!= auth()->id()) {
+        $user = Auth::guard('api')->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
+        if ($post->user_id!= $user->id) {
             return response()->json(['message'=>'You are not authorized to delete this post.']);
         }
         // Delete the post

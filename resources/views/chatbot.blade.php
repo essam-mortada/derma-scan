@@ -43,7 +43,7 @@
 	<div class="flex flex-row m-4">
 	<input
 		type="text"
-		class="flex-1 border rounded-md m-2 border-black 
+		class="flex-1 border rounded-md m-2 border-black-600 
 			p-2 outline-none ring-2 ring-black 
 			border-transparent"
 		placeholder="Chat..."

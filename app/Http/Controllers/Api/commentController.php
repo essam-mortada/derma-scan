@@ -20,6 +20,11 @@ class CommentController extends Controller
 
     public function store(Request $request)
     {
+        $user = Auth::guard('api')->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
         $validator = Validator::make($request->all(), [
             'comment_content' => 'required|string',
             'post_id' => 'required|integer'
@@ -32,17 +37,24 @@ class CommentController extends Controller
         $comment = new Comment();
         $comment->comment_content = strip_tags($request->comment_content);
         $comment->post_id = $request->post_id;
-        $comment->user_id = auth()->id();
+        $comment->user_id = $user->id;
         $comment->save();
 
         return response()->json(['message' => 'Comment created successfully'], 201);
     }
 
     public function update(Request $request, Comment $comment)
-    {
+    { 
+        $user = Auth::guard('api')->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
+        if ($comment->user_id != $user->id) {
+            return response()->json(['error' => 'You are not authorized to update this comment.'], 403);
+        }
         $validator = Validator::make($request->all(), [
             'comment_content' => 'required|string',
-            'post_id' => 'required|integer'
         ]);
             
         
@@ -57,8 +69,13 @@ class CommentController extends Controller
 
     public function destroy(Comment $comment)
     {
+        $user = Auth::guard('api')->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
         // Check if the user is authorized to delete the comment
-        if ($comment->user_id != auth()->id()) {
+        if ($comment->user_id != $user->id) {
             return response()->json(['error' => 'You are not authorized to delete this comment.'], 403);
         }
 

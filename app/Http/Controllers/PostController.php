@@ -145,7 +145,8 @@ class PostController extends Controller
         });
         $post->update($request->all());
     
-        return redirect()->route('home');    }
+        return redirect()->route('home');    
+    }
 
     /**
      * Remove the specified post from storage.

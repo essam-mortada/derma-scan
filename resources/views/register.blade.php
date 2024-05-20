@@ -97,7 +97,6 @@
                             <option value="" disabled selected>Select your role</option>
                             <option value="user" {{ old('type') == 'user' ? 'selected' : '' }}>user</option>
                             <option value="doctor" {{ old('type') == 'doctor' ? 'selected' : '' }}>doctor</option>
-                            <option value="admin" {{ old('type') == 'admin' ? 'selected' : '' }}>admin</option>
 
                         </select>
 
@@ -151,22 +150,3 @@
         </div>
     </div>
 </div>
-<!--
-<script>
-    $(document).ready(function() {
-        $('#type').change(function() {
-            if ($(this).val() == 'doctor') {
-                $('#medical_license_div').show();
-            } else {
-                $('#medical_license_div').hide();
-            }
-        });
-
-        if ($('#type').val() == 'doctor') {
-            $('#medical_license_div').show();
-        } else {
-            $('#medical_license_div').hide();
-        }
-    });
-</script>
--->

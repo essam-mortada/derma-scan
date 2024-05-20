@@ -26,7 +26,9 @@ class User extends Authenticatable
         'gender',
         'location',
         'medical_license',
-        'status'
+        'type',
+        'status',
+        'api_token'
     ];
 
     /**

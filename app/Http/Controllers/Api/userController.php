@@ -7,6 +7,7 @@ use App\Models\comment;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Str; 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
@@ -37,7 +38,11 @@ class UserController extends Controller
 
 public function getAllData()
     {
-       
+        $user = Auth::guard('api')->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
             $posts = Post::all();
             $comments = Comment::all();
             $users = User::all();
@@ -59,6 +64,7 @@ public function getAllData()
 
     public function index()
     {
+        
         // Retrieve all users
         $users = User::all();
 
@@ -68,6 +74,11 @@ public function getAllData()
 
     public function show(User $user)
     {
+        $auth_user = Auth::guard('api')->user();
+
+        if (!$auth_user) {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
         // Return the specified user as JSON response
         return response()->json($user);
     }
@@ -123,34 +134,56 @@ public function getAllData()
         $user->status='pending';
         }
         $user->password = Hash::make($request->password);
+        $user->api_token = Str::random(60);
+
         $user->save();
         // Return success message as JSON response
         return response()->json(['message' => 'User created successfully'], 201);
     }
 
+
+    public function changePassword(Request $request, User $user)
+    {
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required|string|min:8',
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
+
+        $user = User::find($user->id);
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json(['message' => 'Current password is incorrect'], 400);
+        }
+
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return response()->json(['message' => 'Password changed successfully']);
+    }
+
     public function update(Request $request, User $user)
     {
+       
         $validator= Validator::make($request->all() ,[
             'name' => 'required|string|max:255|',
             'email' => 'required|string|email|max:255|exists:users',
-            'password' => 'required|string|min:8|confirmed|alpha_dash',
             'display_name' => 'required|string|max:20|alpha_dash',
-            'gender'=> 'required|string',
             'profile_picture' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
         $validator->after(function ($validator) use ($request) {
             $request->merge([
                 'name' => strip_tags($request->name),
                 'email' => strip_tags($request->email),
-                'password' => strip_tags($request->password),
                 'display_name' => strip_tags($request->display_name),
             ]);
         });
         $user->update($request->all());
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 400);
-        }
-
+        
         // Update the user
         if ($request->hasFile('profile_picture')) {
             // Remove the old picture from storage
@@ -164,14 +197,12 @@ public function getAllData()
             $user->profile_picture = $profilePicturePath;
             $user->save();
         }
-        if ($request->has('password')) {
-            $user->password = Hash::make($request->password);
-            $user->save();
-        }
+        
 
         // Return success message as JSON response
         return response()->json(['message' => 'User updated successfully']);
     }
+}
 
     
 

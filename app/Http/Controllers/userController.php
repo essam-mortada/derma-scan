@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Stevebauman\Location\Facades\Location as FacadesLocation;
+use Illuminate\Support\Str; 
+
 
 class userController extends Controller
 {
@@ -116,6 +118,7 @@ class userController extends Controller
         $user->status='pending';
         }
         $user->password = Hash::make($request->password);
+        $user->api_token = Str::random(60);
         $user->save();
 
        
@@ -188,6 +191,7 @@ class userController extends Controller
         $validator= Validator::make($request->all() ,[
             'name' => 'required|string|max:255|alpha_dash',
             'email' => 'required|string|email|max:255|exists:users',
+            'current_password' => 'required|string|min:8|alpha_dash',
             'password' => 'required|string|min:8|confirmed|alpha_dash',
             'display_name' => 'required|string|max:20|alpha_dash',
             'gender'=> 'required|string',
@@ -214,15 +218,15 @@ class userController extends Controller
             $user->profile_picture = $profilePicturePath;
             $user->save();
         }
-        if ($request->has('password')) {
-            $user->password = Hash::make($request->password);
-            $user->save();
-        }
+            
+        
         
         
     
         return redirect()->route('users.show',$user);    
     }
+
+   
 
 
     public function search(Request $request)
@@ -234,6 +238,39 @@ class userController extends Controller
     
         return view('admin.users', compact('users', 'query'));
     }
+
+
+    public function showChangePasswordForm(User $user)
+    {
+        return view('change-password',compact('user'));
+    }
+
+    public function changePassword(Request $request, User $user)
+    {
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required|string|min:8',
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->route('password.change.form',$user->id)
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return redirect()->route('password.change',$user->id)
+                ->withErrors(['current_password' => 'Current password is incorrect'])
+                ->withInput();
+        }
+
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return redirect()->route('password.change.form',$user->id)->with('status', 'Password changed successfully');
+    }
+
 }
 
 
