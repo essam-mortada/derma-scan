@@ -46,9 +46,15 @@ class PostController extends Controller
 
         // Check if validation fails
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 400);
+            // Get all the error messages as an array
+            $errors = $validator->errors()->all();
+            
+            // Join the error messages into a single string, separated by commas (or any other separator you prefer)
+            $errorMessage = implode(', ', $errors);
+            
+            // Return the single error message
+            return response()->json(['message' => $errorMessage], 400);
         }
-
         $user = Auth::guard('api')->user(); // Authenticate using the 'api' guard
 
         // Check if the user is authenticated
@@ -95,14 +101,29 @@ class PostController extends Controller
             'post_type' => 'required|string',
         ]);
 
-        // Check if validation fails
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 400);
+            // Get all the error messages as an array
+            $errors = $validator->errors()->all();
+            
+            // Join the error messages into a single string, separated by commas (or any other separator you prefer)
+            $errorMessage = implode(', ', $errors);
+            
+            // Return the single error message
+            return response()->json(['message' => $errorMessage], 400);
         }
-
         // Update the post
-        $post->update($request->all());
+        $post->update($request->except(['attachments']));
 
+        if ($request->hasFile('attachments')) {
+            $oldAttachment = $post->attachments;
+            unlink('.../storage/app/public/'.$oldAttachment);
+            $postPictureName = time() . '_' . $request->file('attachments')->getClientOriginalName();
+            $postPicturePath = $request->file('attachments')->storeAs('post_pictures', $postPictureName,'public');
+    
+            $post->attachments = $postPicturePath;
+            $post->save();
+           
+        }
         // Return a success response
         return response()->json(['message' => 'Post updated successfully']);
     }

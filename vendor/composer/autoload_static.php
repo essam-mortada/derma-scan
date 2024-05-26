@@ -19,8 +19,8 @@ class ComposerStaticInit7f6fe487efa1d66a578f8faf7c143249
         'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
-        '9c67151ae59aff4788964ce8eb2a0f43' => __DIR__ . '/..' . '/clue/stream-filter/src/functions_include.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
+        '9c67151ae59aff4788964ce8eb2a0f43' => __DIR__ . '/..' . '/clue/stream-filter/src/functions_include.php',
         '35a6ad97d21e794e7e22a17d806652e4' => __DIR__ . '/..' . '/nunomaduro/termwind/src/Functions.php',
         '3bd81c9b8fcc150b69d8b63b4d2ccf23' => __DIR__ . '/..' . '/spatie/flare-client-php/src/helpers.php',
         '2203a247e6fda86070a5e4e07aed533a' => __DIR__ . '/..' . '/symfony/clock/Resources/now.php',
@@ -98,6 +98,7 @@ class ComposerStaticInit7f6fe487efa1d66a578f8faf7c143249
             'Spatie\\Ignition\\' => 16,
             'Spatie\\FlareClient\\' => 19,
             'Spatie\\Backtrace\\' => 17,
+            'Sichikawa\\LaravelSendgridDriver\\' => 32,
         ),
         'R' => 
         array (
@@ -379,6 +380,10 @@ class ComposerStaticInit7f6fe487efa1d66a578f8faf7c143249
         'Spatie\\Backtrace\\' => 
         array (
             0 => __DIR__ . '/..' . '/spatie/backtrace/src',
+        ),
+        'Sichikawa\\LaravelSendgridDriver\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/s-ichikawa/laravel-sendgrid-driver/src',
         ),
         'Ramsey\\Uuid\\' => 
         array (
@@ -666,6 +671,7 @@ class ComposerStaticInit7f6fe487efa1d66a578f8faf7c143249
 
     public static $classMap = array (
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
+        'App\\Http\\Controllers\\ForgotPasswordController' => __DIR__ . '/../..' . '/app/Http/Controllers/ForgotPasswordController.php',
         'App\\Http\\Controllers\\PostController' => __DIR__ . '/../..' . '/app/Http/Controllers/PostController.php',
         'App\\Http\\Controllers\\adminController' => __DIR__ . '/../..' . '/app/Http/Controllers/adminController.php',
         'App\\Http\\Controllers\\chatbotController' => __DIR__ . '/../..' . '/app/Http/Controllers/chatbotController.php',
@@ -5978,6 +5984,10 @@ class ComposerStaticInit7f6fe487efa1d66a578f8faf7c143249
         'SebastianBergmann\\Type\\UnknownType' => __DIR__ . '/..' . '/sebastian/type/src/type/UnknownType.php',
         'SebastianBergmann\\Type\\VoidType' => __DIR__ . '/..' . '/sebastian/type/src/type/VoidType.php',
         'SebastianBergmann\\Version' => __DIR__ . '/..' . '/sebastian/version/src/Version.php',
+        'Sichikawa\\LaravelSendgridDriver\\MailServiceProvider' => __DIR__ . '/..' . '/s-ichikawa/laravel-sendgrid-driver/src/MailServiceProvider.php',
+        'Sichikawa\\LaravelSendgridDriver\\SendGrid' => __DIR__ . '/..' . '/s-ichikawa/laravel-sendgrid-driver/src/SendGrid.php',
+        'Sichikawa\\LaravelSendgridDriver\\SendgridTransportServiceProvider' => __DIR__ . '/..' . '/s-ichikawa/laravel-sendgrid-driver/src/SendgridTransportServiceProvider.php',
+        'Sichikawa\\LaravelSendgridDriver\\Transport\\SendgridTransport' => __DIR__ . '/..' . '/s-ichikawa/laravel-sendgrid-driver/src/Transport/SendgridTransport.php',
         'Spatie\\Backtrace\\Arguments\\ArgumentReducers' => __DIR__ . '/..' . '/spatie/backtrace/src/Arguments/ArgumentReducers.php',
         'Spatie\\Backtrace\\Arguments\\ProvidedArgument' => __DIR__ . '/..' . '/spatie/backtrace/src/Arguments/ProvidedArgument.php',
         'Spatie\\Backtrace\\Arguments\\ReduceArgumentPayloadAction' => __DIR__ . '/..' . '/spatie/backtrace/src/Arguments/ReduceArgumentPayloadAction.php',

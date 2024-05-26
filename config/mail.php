@@ -33,8 +33,21 @@ return [
     |            "postmark", "log", "array", "failover", "roundrobin"
     |
     */
+    'default' => env('MAIL_MAILER', 'sendgrid'),
+
 
     'mailers' => [
+
+        'sendgrid' => [
+            'transport' => 'sendgrid',
+            'api_key' => env('SENDGRID_API_KEY'),
+            'host' => env('MAIL_HOST', 'smtp.sendgrid.net'),
+            'port' => env('MAIL_PORT', 587),
+            'encryption' => env('MAIL_ENCRYPTION', 'tls'),
+            'username' => env('MAIL_USERNAME'),
+            'password' => env('MAIL_PASSWORD'),
+        ],
+        
 
         'smtp' => [
             'transport' => 'smtp',
@@ -96,8 +109,8 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', 'Example'),
+        'address' => env('MAIL_FROM_ADDRESS', 'esammortda2001@gmail.com'),
+        'name' => env('MAIL_FROM_NAME', 'derma scan'),
     ],
 
 ];

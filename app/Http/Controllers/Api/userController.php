@@ -106,7 +106,14 @@ public function getAllData()
             ]);
         });
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 400);
+            // Get all the error messages as an array
+            $errors = $validator->errors()->all();
+            
+            // Join the error messages into a single string, separated by commas (or any other separator you prefer)
+            $errorMessage = implode(', ', $errors);
+            
+            // Return the single error message
+            return response()->json(['message' => $errorMessage], 400);
         }
         $profilePicturePath = null;
         if ($request->hasFile('profile_picture')) {
@@ -150,7 +157,14 @@ public function getAllData()
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 400);
+            // Get all the error messages as an array
+            $errors = $validator->errors()->all();
+            
+            // Join the error messages into a single string, separated by commas (or any other separator you prefer)
+            $errorMessage = implode(', ', $errors);
+            
+            // Return the single error message
+            return response()->json(['message' => $errorMessage], 400);
         }
 
         $user = User::find($user->id);
@@ -180,24 +194,30 @@ public function getAllData()
                 'display_name' => strip_tags($request->display_name),
             ]);
         });
-        $user->update($request->all());
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 400);
-        
-        // Update the user
+            // Get all the error messages as an array
+            $errors = $validator->errors()->all();
+            
+            // Join the error messages into a single string, separated by commas (or any other separator you prefer)
+            $errorMessage = implode(', ', $errors);
+            
+            // Return the single error message
+            return response()->json(['message' => $errorMessage], 400);
+        }
+
+         $user->update($request->except(['profile_picture']));
         if ($request->hasFile('profile_picture')) {
             // Remove the old picture from storage
             if ($user->profile_picture) {
-                Storage::delete($user->profile_picture);
+                $oldImage = $user->profile_picture;
+                unlink('.../storage/app/public/'.$oldImage);
+                // Upload the new picture to storage
+                $profilePicture = $request->file('profile_picture');
+                $profilePictureName = time(). '_'. $profilePicture->getClientOriginalName();
+                $profilePicturePath = $profilePicture->storeAs('profile_pictures', $profilePictureName,'public');
+                $user->profile_picture = $profilePicturePath;
+                $user->save();
             }
-    
-            $profilePicture = $request->file('profile_picture');
-            $profilePictureName = time(). '_'. $profilePicture->getClientOriginalName();
-            $profilePicturePath = $profilePicture->storeAs('profile_pictures', $profilePictureName,'public');
-            $user->profile_picture = $profilePicturePath;
-            $user->save();
-        }
-        
 
         // Return success message as JSON response
         return response()->json(['message' => 'User updated successfully']);
@@ -216,7 +236,14 @@ public function getAllData()
     ]);
 
     if ($validator->fails()) {
-        return response()->json(['errors' => $validator->errors()], 400);
+        // Get all the error messages as an array
+        $errors = $validator->errors()->all();
+        
+        // Join the error messages into a single string, separated by commas (or any other separator you prefer)
+        $errorMessage = implode(', ', $errors);
+        
+        // Return the single error message
+        return response()->json(['message' => $errorMessage], 400);
     }
 
     // Attempt to authenticate the user
@@ -229,4 +256,25 @@ public function getAllData()
     return response()->json(['message' => 'Invalid credentials'], 401);
     }
 
+
+
+    public function destroy(Request $request, $id)
+    {
+        // Check if the user is authorized to delete the user
+        $user= Auth::guard('api')->user();
+        if ($user->id != $id) {
+            return response()->json(['message' => 'you are Unauthorized to delete this account'], 403);
+        }
+        $user = User::findOrFail($id);
+        if ($user->profile_picture && file_exists(asset('storage/' . $user->profile_picture))) {
+            unlink('.../storage/app/public/'.  $user->profile_picture);
+        }
+        if ($user->medical_license && file_exists(asset('storage/' . $user->medical_license))) {
+            unlink('.../storage/app/public/'.  $user->medical_license);
+        }
+
+        // Delete the doctor record
+        $user->delete();
+        return response()->json(['message' => ' account deleted succesfully'], 401);
+    }
 }

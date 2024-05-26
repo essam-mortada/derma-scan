@@ -25,7 +25,9 @@
           <li class="nav-item">
             <a class="nav-link " aria-current="page" href="{{route('admin.edit',Auth::user()->id)}}">edit profile</a>
           </li>
-         
+          <li class="nav-item">
+          <a class="nav-link " href="{{ route('password.change.admin', Auth::user()->id) }}">Change Password</a>
+          </li>
         </ul>
         
       </div>

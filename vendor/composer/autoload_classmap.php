@@ -7,6 +7,7 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'App\\Http\\Controllers\\Controller' => $baseDir . '/app/Http/Controllers/Controller.php',
+    'App\\Http\\Controllers\\ForgotPasswordController' => $baseDir . '/app/Http/Controllers/ForgotPasswordController.php',
     'App\\Http\\Controllers\\PostController' => $baseDir . '/app/Http/Controllers/PostController.php',
     'App\\Http\\Controllers\\adminController' => $baseDir . '/app/Http/Controllers/adminController.php',
     'App\\Http\\Controllers\\chatbotController' => $baseDir . '/app/Http/Controllers/chatbotController.php',
@@ -5319,6 +5320,10 @@ return array(
     'SebastianBergmann\\Type\\UnknownType' => $vendorDir . '/sebastian/type/src/type/UnknownType.php',
     'SebastianBergmann\\Type\\VoidType' => $vendorDir . '/sebastian/type/src/type/VoidType.php',
     'SebastianBergmann\\Version' => $vendorDir . '/sebastian/version/src/Version.php',
+    'Sichikawa\\LaravelSendgridDriver\\MailServiceProvider' => $vendorDir . '/s-ichikawa/laravel-sendgrid-driver/src/MailServiceProvider.php',
+    'Sichikawa\\LaravelSendgridDriver\\SendGrid' => $vendorDir . '/s-ichikawa/laravel-sendgrid-driver/src/SendGrid.php',
+    'Sichikawa\\LaravelSendgridDriver\\SendgridTransportServiceProvider' => $vendorDir . '/s-ichikawa/laravel-sendgrid-driver/src/SendgridTransportServiceProvider.php',
+    'Sichikawa\\LaravelSendgridDriver\\Transport\\SendgridTransport' => $vendorDir . '/s-ichikawa/laravel-sendgrid-driver/src/Transport/SendgridTransport.php',
     'Spatie\\Backtrace\\Arguments\\ArgumentReducers' => $vendorDir . '/spatie/backtrace/src/Arguments/ArgumentReducers.php',
     'Spatie\\Backtrace\\Arguments\\ProvidedArgument' => $vendorDir . '/spatie/backtrace/src/Arguments/ProvidedArgument.php',
     'Spatie\\Backtrace\\Arguments\\ReduceArgumentPayloadAction' => $vendorDir . '/spatie/backtrace/src/Arguments/ReduceArgumentPayloadAction.php',

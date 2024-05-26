@@ -3,6 +3,7 @@
 use App\Http\Controllers\adminController;
 use App\Http\Controllers\chatbotController;
 use App\Http\Controllers\commentController;
+use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\userController;
 use Illuminate\Support\Facades\Route;
@@ -25,8 +26,12 @@ Route::group(['middleware' => 'auth'],function () {
 Route::get('/profile/show/{user}', [userController::class, 'show'])->name('users.show');
 Route::get('/profile/{user}/edit', [userController::class, 'edit'])->name('users.edit');
 Route::put('/profile/{user}', [userController::class, 'update'])->name('users.update');
-Route::get('/change-password/{user}', [UserController::class, 'showChangePasswordForm'])->name('password.change.form');
+Route::get('/change-password/profile/{user}', [UserController::class, 'showChangePasswordForm'])->name('password.change.form');
 Route::post('/change-password/{user}', [UserController::class, 'changePassword'])->name('password.change');
+
+
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //admin
 /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -38,6 +43,7 @@ Route::get('/comments/search', [commentController::class, 'search'])->name('comm
 
 Route::get('/admin/{user}/edit', [adminController::class, 'edit'])->name('admin.edit');
 Route::put('/admin/{user}', [adminController::class, 'update'])->name('admin.update');
+Route::get('/change-password/{user}', [adminController::class, 'showChangePasswordForm'])->name('password.change.admin');
 
 Route::get('/admin/doctors', [adminController::class, 'showDoctors'])->name('admin.doctor-requests');
 Route::put('/users/{user}/approve', [adminController::class, 'approve'])->name('users.approve');
@@ -89,3 +95,10 @@ Route::post('/register', 'App\Http\Controllers\userController@register');
 
 Route::get('/login', 'App\Http\Controllers\userController@showLoginForm')->name('login');
 Route::post('/login', 'App\Http\Controllers\userController@login');
+
+
+Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('password/reset/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('password/reset', [ForgotPasswordController::class, 'reset'])->name('password.update');
+

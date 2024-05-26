@@ -143,8 +143,19 @@ class PostController extends Controller
                 'privacy' => strip_tags($request->post_type),
             ]);
         });
-        $post->update($request->all());
-    
+        $post->update($request->except(['attachments']));
+
+    if ($request->hasFile('attachments')) {
+        $oldAttachment = $post->attachments;
+        unlink('../storage/app/public/'.$oldAttachment);
+        $postPictureName = time() . '_' . $request->file('attachments')->getClientOriginalName();
+        $postPicturePath = $request->file('attachments')->storeAs('post_pictures', $postPictureName,'public');
+
+        $post->attachments = $postPicturePath;
+        $post->save();
+       
+    }
+
         return redirect()->route('home');    
     }
 
@@ -160,7 +171,7 @@ class PostController extends Controller
     }
 
     if ($post->attachments && file_exists(storage_path('../storage/app/' . $post->attachments))) {
-        unlink('../storage/app/'.  $post->attachments);
+        unlink('../storage/app/public'.  $post->attachments);
     }
 
     // Delete the doctor record

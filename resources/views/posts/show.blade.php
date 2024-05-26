@@ -27,8 +27,7 @@
     <div class="box-body" style="display: block;">
         @if ($post->attachments)
             
-        
-      <img class="img-responsive pad" src="{{$postImage}}" alt="Photo">
+      <img style="width: 50%" class="img-responsive pad" src="{{$postImage}}" alt="Photo">
       @endif
       <p>{{ $post->post_text }}</p>
       <button type="button" class="btn btn-default btn-xs"><i class="fa fa-thumbs-o-up"></i> Like</button>

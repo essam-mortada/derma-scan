@@ -20,7 +20,7 @@
         </div>
         @if ($user->id==Auth::user()->id)            
         <a class="btn btn-primary float-end" href="{{route('users.edit',$user->id)}}">edit profile</a>
-        <a class="btn btn-primary float-end" href="{{ route('password.change.form', Auth::user()->id) }}">Change Password</a>
+        <a class="btn btn-primary float-end" href="{{route('password.change.form', $user->id)}}">Change Password</a>
 
         @endif
 

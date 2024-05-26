@@ -29,11 +29,16 @@ class CommentController extends Controller
             'comment_content' => 'required|string',
             'post_id' => 'required|integer'
         ]);
-
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 400);
+            // Get all the error messages as an array
+            $errors = $validator->errors()->all();
+            
+            // Join the error messages into a single string, separated by commas (or any other separator you prefer)
+            $errorMessage = implode(', ', $errors);
+            
+            // Return the single error message
+            return response()->json(['message' => $errorMessage], 400);
         }
-
         $comment = new Comment();
         $comment->comment_content = strip_tags($request->comment_content);
         $comment->post_id = $request->post_id;
@@ -59,7 +64,14 @@ class CommentController extends Controller
             
         
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 400);
+            // Get all the error messages as an array
+            $errors = $validator->errors()->all();
+            
+            // Join the error messages into a single string, separated by commas (or any other separator you prefer)
+            $errorMessage = implode(', ', $errors);
+            
+            // Return the single error message
+            return response()->json(['message' => $errorMessage], 400);
         }
 
         $comment->update($request->all());

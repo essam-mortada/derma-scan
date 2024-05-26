@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Stevebauman\Location\Facades\Location as FacadesLocation;
 use Illuminate\Support\Str; 
 
 
@@ -66,7 +65,7 @@ class userController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255|alpha_dash',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed|alpha_dash',
+            'password' => 'required|string|min:8|confirmed|alpha_dash|unique:users',
             'display_name' => 'required|string|max:20|alpha_dash',
             'gender'=> 'required|string',
             'profile_picture' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -190,11 +189,8 @@ class userController extends Controller
     {
         $validator= Validator::make($request->all() ,[
             'name' => 'required|string|max:255|alpha_dash',
-            'email' => 'required|string|email|max:255|exists:users',
-            'current_password' => 'required|string|min:8|alpha_dash',
-            'password' => 'required|string|min:8|confirmed|alpha_dash',
+            'email' => 'required|string|email|max:255|exists:users',            
             'display_name' => 'required|string|max:20|alpha_dash',
-            'gender'=> 'required|string',
             'profile_picture' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
         $validator->after(function ($validator) use ($request) {
@@ -205,19 +201,22 @@ class userController extends Controller
                 'display_name' => strip_tags($request->display_name),
             ]);
         });
-        $user->update($request->all());
+        $user->update($request->except(['profile_picture']));
         if ($request->hasFile('profile_picture')) {
             // Remove the old picture from storage
             if ($user->profile_picture) {
-                Storage::disk('public')->delete($user->profile_picture);
-            }
+                $oldImage = $user->profile_picture;
+                unlink('../storage/app/public/'.$oldImage);}
+                // Upload the new picture to storage
+                $profilePicture = $request->file('profile_picture');
+                $profilePictureName = time(). '_'. $profilePicture->getClientOriginalName();
+                $profilePicturePath = $profilePicture->storeAs('profile_pictures', $profilePictureName,'public');
+                $user->profile_picture = $profilePicturePath;
+                $user->save();
+                }
     
-            $profilePicture = $request->file('profile_picture');
-            $profilePictureName = time(). '_'. $profilePicture->getClientOriginalName();
-            $profilePicturePath = $profilePicture->storeAs('profile_pictures', $profilePictureName,'public');
-            $user->profile_picture = $profilePicturePath;
-            $user->save();
-        }
+           
+        
             
         
         
@@ -270,6 +269,8 @@ class userController extends Controller
 
         return redirect()->route('password.change.form',$user->id)->with('status', 'Password changed successfully');
     }
+
+
 
 }
 
