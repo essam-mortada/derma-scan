@@ -45,7 +45,10 @@ class CommentController extends Controller
         $comment->user_id = $user->id;
         $comment->save();
 
-        return response()->json(['message' => 'Comment created successfully'], 201);
+        $comment->load('post', 'user');
+
+        return response()->json(['message' => 'Comment created successfully','data'=>$comment]);
+
     }
 
     public function update(Request $request, Comment $comment)

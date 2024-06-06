@@ -67,8 +67,12 @@ public function getAllData()
         
         // Retrieve all users
         $users = User::all();
-
-        // Return users as JSON response
+        $users->map(function($user) {
+            $user->profile_picture_url = $user->profile_picture 
+            ? asset('storage/' . $user->profile_picture) 
+            : null;
+            return $user;
+        });
         return response()->json($users);
     }
 
@@ -79,6 +83,9 @@ public function getAllData()
         if (!$auth_user) {
             return response()->json(['message' => 'User not authenticated'], 401);
         }
+        $user->profile_picture_url = $user->profile_picture 
+                ? asset('storage/' . $user->profile_picture) 
+                : null;
         // Return the specified user as JSON response
         return response()->json($user);
     }
@@ -141,7 +148,7 @@ public function getAllData()
         $user->status='pending';
         }
         $user->password = Hash::make($request->password);
-        $user->api_token = Str::random(60);
+        $user->api_token =null;
 
         $user->save();
         // Return success message as JSON response
@@ -178,13 +185,16 @@ public function getAllData()
         return response()->json(['message' => 'Password changed successfully']);
     }
 
+    
     public function update(Request $request, User $user)
     {
-       
+       if (Auth::guard('api')->user()->id!= $user->id) {
+        return response()->json(["message"=>'you are not authenticated']);
+       }
         $validator= Validator::make($request->all() ,[
-            'name' => 'required|string|max:255|',
-            'email' => 'required|string|email|max:255|exists:users',
-            'display_name' => 'required|string|max:20|alpha_dash',
+            'name' => 'string|max:255|',
+            'email' => 'string|email|max:255|exists:users',
+            'display_name' => 'string|max:20|alpha_dash',
             'profile_picture' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
         $validator->after(function ($validator) use ($request) {
@@ -220,51 +230,63 @@ public function getAllData()
             }
 
         // Return success message as JSON response
-        return response()->json(['message' => 'User updated successfully']);
     }
+    return response()->json(['message' => 'User updated successfully']);
+
 }
 
     
 
 
-    public function login(Request $request)
-    {
-    // Validate user input
+public function login(Request $request)
+{
+    // Validate the login request
     $validator = Validator::make($request->all(), [
         'email' => 'required|email',
-        'password' => 'required',
+        'password' => 'required|string|min:6',
     ]);
 
     if ($validator->fails()) {
-        // Get all the error messages as an array
-        $errors = $validator->errors()->all();
-        
-        // Join the error messages into a single string, separated by commas (or any other separator you prefer)
-        $errorMessage = implode(', ', $errors);
-        
-        // Return the single error message
-        return response()->json(['message' => $errorMessage], 400);
+        return response()->json(['errors' => $validator->errors()], 400);
     }
 
     // Attempt to authenticate the user
-    if (Auth::attempt($request->only('email', 'password'))) {
-        // Authentication successful, return the authenticated user
-        return response()->json(['user' => Auth::user()]);
+    $credentials = $request->only('email', 'password');
+    if (!Auth::attempt($credentials)) {
+        return response()->json(['message' => 'Invalid credentials'], 401);
     }
 
-    // Authentication failed, return error message
-    return response()->json(['message' => 'Invalid credentials'], 401);
-    }
+    // Get the authenticated user
+    $user = Auth::user();
+    $newApiToken = Str::random(60);
+    $user->api_token = $newApiToken;
+    $user->save(); 
+    
+    // Return the user's information along with a success message
+    return response()->json([
+        'message' => 'Login successful',
+        'user' => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'display_name' => $user->display_name,
+            'profile_picture' => $user->profile_picture,
+            'gender' => $user->gender,
+            'type' => $user->type,
+            'api_token'=>$user->api_token
+        ],
+    ], 200);
+}
 
 
 
     public function destroy(Request $request, $id)
     {
         // Check if the user is authorized to delete the user
-        $user= Auth::guard('api')->user();
+      /*  $user= Auth::guard('api')->user();
         if ($user->id != $id) {
             return response()->json(['message' => 'you are Unauthorized to delete this account'], 403);
-        }
+        }*/
         $user = User::findOrFail($id);
         if ($user->profile_picture && file_exists(asset('storage/' . $user->profile_picture))) {
             unlink('.../storage/app/public/'.  $user->profile_picture);
@@ -277,4 +299,38 @@ public function getAllData()
         $user->delete();
         return response()->json(['message' => ' account deleted succesfully'], 401);
     }
+
+    public function getUserPosts(User $user)
+    {
+        // Retrieve posts for the specific user
+        $posts = Post::where('user_id', $user->id)->get();
+        $posts->map(function($post) {
+            $post->image_url = $post->attachments ? asset('storage/' . $post->attachments) : null;
+            $post->user->profile_picture_url = $post->user->profile_picture 
+            ? asset('storage/' . $post->user->profile_picture) 
+            : null;
+            return $post;
+        });
+
+    return response()->json(['data'=>$posts]);
+    }
+
+
+    public function logout(Request $request)
+    {
+        $user= Auth::guard('api')->user();
+        // Revoke the token that was used to authenticate the current request
+        if ($user) {
+            $user->api_token = null;
+            $user->save();
+            return response()->json(['message' => 'Logout successful'], 200);
+
+            }else{
+        
+
+        // Return a success response
+        return response()->json(['message' => 'you are not authenticated'], 200);
+        }
+    }
+   
 }
