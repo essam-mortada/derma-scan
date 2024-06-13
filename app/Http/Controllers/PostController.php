@@ -78,6 +78,10 @@ class PostController extends Controller
     {
         $post = Post::find($postId);
         $post->upvotes++;
+        if ($post->downvotes > 0) {
+            $post->downvotes--;
+        }
+        
         $post->save();
 
         return redirect()->back()->with('success', 'Post upvoted successfully.');
@@ -87,6 +91,9 @@ class PostController extends Controller
     {
         $post = Post::find($postId);
         $post->downvotes++;
+        if ($post->upvotes > 0) {
+            $post->upvotes--;
+            }
         $post->save();
 
         return redirect()->back()->with('success', 'Post downvoted successfully.');

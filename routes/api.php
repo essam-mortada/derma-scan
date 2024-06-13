@@ -6,7 +6,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\ForgotPasswordController;
-use App\Http\Controllers\chatbotController;
+use App\Http\Controllers\Api\PredictController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -28,6 +28,7 @@ Route::get('/user', function (Request $request) {
     Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail']);
     Route::post('/reset-password', [ForgotPasswordController::class, 'reset']);
 
+    Route::post('/predict', [PredictController::class, 'predict']);
     // post endpoints
     Route::get('/posts', [PostController::class, 'index']);
     Route::get('/posts/show/{post}', [PostController::class, 'show']);
@@ -38,8 +39,11 @@ Route::get('/user', function (Request $request) {
     Route::post('/posts/downvote/{post}', [PostController::class, 'downvote']);
     Route::get('/posts/comments/{postId}', [PostController::class, 'showCommentsByPost']);
     Route::post('/posts/search', [PostController::class, 'search']);
+    Route::get('/posts/commentsCount/{postId}', [PostController::class, 'getCommentsCount']);
+    Route::get('/posts/upvotes/{postId}', [PostController::class, 'getUpvotes']);
+    Route::get('/posts/downvotes/{postId}', [PostController::class, 'getDownvotes']);
 
-
+    
     // comment endpoints
     Route::post('/comments/create', [CommentController::class, 'store']);
     Route::post('/comments/update/{comment}', [CommentController::class, 'update']);

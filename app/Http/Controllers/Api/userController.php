@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
@@ -185,7 +186,7 @@ public function getAllData()
         return response()->json(['message' => 'Password changed successfully']);
     }
 
-    
+
     public function update(Request $request, User $user)
     {
        if (Auth::guard('api')->user()->id!= $user->id) {
@@ -256,26 +257,30 @@ public function login(Request $request)
         return response()->json(['message' => 'Invalid credentials'], 401);
     }
 
-    // Get the authenticated user
-    $user = Auth::user();
-    $newApiToken = Str::random(60);
-    $user->api_token = $newApiToken;
-    $user->save(); 
-    
-    // Return the user's information along with a success message
-    return response()->json([
-        'message' => 'Login successful',
-        'user' => [
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'display_name' => $user->display_name,
-            'profile_picture' => $user->profile_picture,
-            'gender' => $user->gender,
-            'type' => $user->type,
-            'api_token'=>$user->api_token
-        ],
-    ], 200);
+     try {
+        // Get the authenticated user
+        $user = Auth::user();
+        $newApiToken = Str::random(60);
+        $user->api_token = $newApiToken;
+        $user->save();
+
+        // Return the user's information along with a success message
+        return response()->json([
+            'message' => 'Login successful',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'display_name' => $user->display_name,
+                'profile_picture' => $user->profile_picture ? asset('storage/' . $user->profile_picture) : null,
+                'gender' => $user->gender,
+                'type' => $user->type,
+                'api_token' => $user->api_token
+            ],
+        ], 200);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'An error occurred while saving the user.'], 500);
+    }
 }
 
 
@@ -332,5 +337,9 @@ public function login(Request $request)
         return response()->json(['message' => 'you are not authenticated'], 200);
         }
     }
+
+
+
+
    
 }

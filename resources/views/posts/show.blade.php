@@ -30,9 +30,16 @@
       <img style="width: 50%" class="img-responsive pad" src="{{$postImage}}" alt="Photo">
       @endif
       <p>{{ $post->post_text }}</p>
-      <button type="button" class="btn btn-default btn-xs"><i class="fa fa-thumbs-o-up"></i> Like</button>
-      <button type="button" class="btn btn-default btn-xs"><i class="fa fa-thumbs-o-down"></i> disLike</button>
+      <div class="row">
+      <form action="{{route("posts.upvote", $post->id)}}" method="post">
+        @csrf
+        <button type="submit" class="btn btn-default btn-xs"><i class="fa fa-thumbs-o-up"></i> Like</button>
+      </form>
 
+      <form action="{{route("posts.downvote", $post->id)}}" method="post">
+      <button type="submit" class="btn btn-default btn-xs"><i class="fa fa-thumbs-o-down"></i> disLike</button>
+    </form>
+    </div>
       <span class="pull-right text-muted">{{ $post->upvotes }} likes </span>
       <span class="pull-right text-muted mx-2">{{ $post->downvotes }} dislikes </span>
 

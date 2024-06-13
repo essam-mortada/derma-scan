@@ -18,17 +18,27 @@ class PostController extends Controller
      */
     public function index()
 {
-    // Eager load the user and comments relationships
-    $posts = Post::with('user') // Assuming a user relationship exists
-                ->withCount('comments') // Assuming a comments relationship exists
-                ->get()
-                ->map(function($post) {
-                    $post->image_url = $post->attachments ? asset('storage/' . $post->attachments) : null;
-                    $post->user->profile_picture_url = $post->user->profile_picture 
-                    ? asset('storage/' . $post->user->profile_picture) 
-                    : null;
-                    return $post;
-                });
+    $posts = Post::with(['user', 'comments.user']) 
+    ->withCount('comments') 
+    ->get()
+    ->map(function ($post) {
+        $post->image_url = $post->attachments ? asset('storage/' . $post->attachments) : null;
+
+        // Set the user profile picture URL
+        $post->user->profile_picture_url = $post->user->profile_picture 
+            ? asset('storage/' . $post->user->profile_picture) 
+            : null;
+
+        // Map over the comments to set the user profile picture URL
+        $post->comments = $post->comments->map(function ($comment) {
+            $comment->user->profile_picture_url = $comment->user->profile_picture
+                ? asset('storage/' . $comment->user->profile_picture)
+                : null;
+            return $comment;
+        });
+
+        return $post;
+    });
 
     return response()->json(['data'=>$posts]);
 }
@@ -88,7 +98,7 @@ class PostController extends Controller
     {
         // Validate the request data
         $validator = Validator::make($request->all(), [
-            'post_text' => 'required|string',
+            'post_text' => 'string',
             'attachments' => 'nullable',
             'privacy' => 'string',
             'post_type' => 'string',
@@ -120,9 +130,9 @@ class PostController extends Controller
         }
         // Create a new post
         $post = new Post();
-        $post->user_id = $user->id;;
-        $post->post_text = $request->post_text;
-        $post->attachments = $postPicturePath;
+        $post->user_id =strip_tags( $user->id);
+     $post->post_text = strip_tags( $request->post_text);
+        $post->attachments =strip_tags(  $postPicturePath);
         $post->privacy = "public";
         $post->post_type = "article";
         $post->save();
@@ -166,14 +176,16 @@ class PostController extends Controller
         $post->update($request->except(['attachments']));
 
         if ($request->hasFile('attachments')) {
+            if($post->attacments!=null){
             $oldAttachment = $post->attachments;
             unlink('.../storage/app/public/'.$oldAttachment);
+            }
             $postPictureName = time() . '_' . $request->file('attachments')->getClientOriginalName();
             $postPicturePath = $request->file('attachments')->storeAs('post_pictures', $postPictureName,'public');
     
             $post->attachments = $postPicturePath;
             $post->save();
-           
+            
         }
         // Return a success response
         return response()->json(['message' => 'Post updated successfully']);
@@ -201,7 +213,9 @@ class PostController extends Controller
     public function upvote(Post $post)
     {
         $post->upvotes++;
-        $post->downvotes--;
+        if ($post->downvotes > 0) {
+            $post->downvotes--;
+        }
         $post->save();
 
         return response()->json(['message' => 'Post upvoted successfully']);
@@ -213,7 +227,9 @@ class PostController extends Controller
     public function downvote(Post $post)
     {
         $post->downvotes++;
-        $post->upvotes--;
+        if ($post->upvotes > 0) {
+            $post->upvotes--;
+            }
         $post->save();
 
         return response()->json(['message' => 'Post downvoted successfully']);
@@ -297,6 +313,64 @@ class PostController extends Controller
         ]
     ], 200);
     
+}
+
+public function getCommentsCount($postId)
+{
+    // Fetch the post with its comments
+    $post = Post::with('comments')->find($postId);
+
+    // Check if the post exists
+    if (!$post) {
+        return response()->json(['message' => 'Post not found'], 404);
+    }
+
+    // Get the comments count
+    $commentsCount = $post->comments->count();
+
+    // Return the response
+    return response()->json([
+        'message' => 'Comments count retrieved successfully',
+        'data' => [
+            'commentsCount' => $commentsCount
+        ]
+    ], 200);
+}
+
+public function getUpvotes($postId)
+{
+    // Fetch the post with its comments
+    $post = Post::find($postId);
+
+    // Check if the post exists
+    if (!$post) {
+        return response()->json(['message' => 'Post not found'], 404);
+    }
+
+    return response()->json([
+        'message' => 'upvotes retrieved successfully',
+        'data' => [
+            'upvotes' => $post->upvotes
+        ]
+    ], 200);
+}
+
+public function getDownvotes($postId)
+{
+    // Fetch the post with its comments
+    $post = Post::find($postId);
+
+    // Check if the post exists
+    if (!$post) {
+        return response()->json(['message' => 'Post not found'], 404);
+    }
+    
+    return response()->json([
+        'message' => 'upvotes retrieved successfully',
+        'data' => [
+            'downvotes' => $post->downvotes
+        ]
+    ], 200);
 }
 
 }
