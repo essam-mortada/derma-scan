@@ -17,12 +17,12 @@ class PostController extends Controller
     /**
      * Display a listing of the post.
      */
-    
-    
+
+
     public function showCommentsByPost($postId)
     {
         return Comment::where('post_id', $postId)->get();
-    
+
     }
     /**
      * Show the form for creating a new post.
@@ -33,7 +33,7 @@ class PostController extends Controller
     }
 
     /**
-     * 
+     *
      * Store a newly created post in storage.
      */
     public function store(Request $request)
@@ -44,7 +44,7 @@ class PostController extends Controller
             'attachments' => 'nullable|string|alpha_dash',
             'privacy' => 'required|nullable|string|alpha_dash',
             'post_type' => 'required|nullable|string|alpha_dash',
-            
+
         ]);
         $validator->after(function ($validator) use ($request) {
             $request->merge([
@@ -62,16 +62,16 @@ class PostController extends Controller
             $postPicturePath = $postPicture->storeAs('post_pictures', $postPictureName,'public');
         }
         $post = new Post();
-        $post->user_id = auth()->user()->id ?? $request->user_id; 
+        $post->user_id = auth()->user()->id ?? $request->user_id;
         $post->post_text = $request->post_text;
         $post->post_type = $request->post_type;
-        $post->privacy = $request->privacy;
+        $post->privacy = "public";
         $post->attachments = $postPicturePath;
         $post->created_at = Date::now(config('app.timezone'))->format('Y-m-d H:i:s');
- 
+
         $post->save();
-    
-        return redirect()->route('home');    
+
+        return redirect()->route('community');
     }
 
     public function upvote(Request $request, $postId)
@@ -81,7 +81,7 @@ class PostController extends Controller
         if ($post->downvotes > 0) {
             $post->downvotes--;
         }
-        
+
         $post->save();
 
         return redirect()->back()->with('success', 'Post upvoted successfully.');
@@ -141,7 +141,7 @@ class PostController extends Controller
             'post_text' => 'required|string',
             'attachments' => 'nullable|string',
             'privacy' => 'required|string',
-           
+
         ]);
         $validator->after(function ($validator) use ($request) {
             $request->merge([
@@ -160,10 +160,10 @@ class PostController extends Controller
 
         $post->attachments = $postPicturePath;
         $post->save();
-       
+
     }
 
-        return redirect()->route('home');    
+        return redirect()->route('community');
     }
 
     /**
@@ -171,8 +171,8 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-       
-    $post = Post::findOrFail($post->id); 
+
+    $post = Post::findOrFail($post->id);
     if ($post->user_id!= auth()->id()) {
         return redirect()->back()->with('error', 'You are not authorized to delete this post.');
     }
@@ -184,16 +184,16 @@ class PostController extends Controller
     // Delete the doctor record
     $post->delete();
     return redirect()->back()->with('success', 'post deleted successfully.');
-    } 
-    
-    
+    }
+
+
     public function search(Request $request)
     {
         $query = $request->input('query');
-    
+
         $posts = Post::where('post_text', 'like', "%{$query}%")
             ->paginate(10);
-    
+
         return view('admin.posts', compact('posts', 'query'));
     }
   }

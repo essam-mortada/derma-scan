@@ -7,7 +7,7 @@ use App\Models\comment;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use App\Models\User;
-use Illuminate\Support\Str; 
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
@@ -24,7 +24,7 @@ class UserController extends Controller
         $comments = comment::all();
         $users = User::all();
         $user = Auth::user();
-        
+
         if ($user->type == 'user' || $user->type == 'doctor') {
             return response()->json(['posts' => $posts, 'comments' => $comments, 'user' => $user]);
         } elseif ($user->type == 'admin') {
@@ -58,19 +58,19 @@ public function getAllData()
                 'authenticated_user' => $user,
                 ]
             ]);
-        
-           
+
+
     }
 
 
     public function index()
     {
-        
+
         // Retrieve all users
         $users = User::all();
         $users->map(function($user) {
-            $user->profile_picture_url = $user->profile_picture 
-            ? asset('storage/' . $user->profile_picture) 
+            $user->profile_picture_url = $user->profile_picture
+            ? asset('storage/' . $user->profile_picture)
             : null;
             return $user;
         });
@@ -84,8 +84,8 @@ public function getAllData()
         if (!$auth_user) {
             return response()->json(['message' => 'User not authenticated'], 401);
         }
-        $user->profile_picture_url = $user->profile_picture 
-                ? asset('storage/' . $user->profile_picture) 
+        $user->profile_picture_url = $user->profile_picture
+                ? asset('storage/' . $user->profile_picture)
                 : null;
         // Return the specified user as JSON response
         return response()->json($user);
@@ -116,10 +116,10 @@ public function getAllData()
         if ($validator->fails()) {
             // Get all the error messages as an array
             $errors = $validator->errors()->all();
-            
+
             // Join the error messages into a single string, separated by commas (or any other separator you prefer)
             $errorMessage = implode(', ', $errors);
-            
+
             // Return the single error message
             return response()->json(['message' => $errorMessage], 400);
         }
@@ -167,10 +167,10 @@ public function getAllData()
         if ($validator->fails()) {
             // Get all the error messages as an array
             $errors = $validator->errors()->all();
-            
+
             // Join the error messages into a single string, separated by commas (or any other separator you prefer)
             $errorMessage = implode(', ', $errors);
-            
+
             // Return the single error message
             return response()->json(['message' => $errorMessage], 400);
         }
@@ -208,10 +208,10 @@ public function getAllData()
         if ($validator->fails()) {
             // Get all the error messages as an array
             $errors = $validator->errors()->all();
-            
+
             // Join the error messages into a single string, separated by commas (or any other separator you prefer)
             $errorMessage = implode(', ', $errors);
-            
+
             // Return the single error message
             return response()->json(['message' => $errorMessage], 400);
         }
@@ -236,7 +236,7 @@ public function getAllData()
 
 }
 
-    
+
 
 
 public function login(Request $request)
@@ -288,8 +288,8 @@ public function login(Request $request)
     public function destroy(Request $request, $id)
     {
         // Check if the user is authorized to delete the user
-      /*  $user= Auth::guard('api')->user();
-        if ($user->id != $id) {
+        /*$user= Auth::guard('api')->user();
+        if (Auth::guard('api')->user()->id != $id) {
             return response()->json(['message' => 'you are Unauthorized to delete this account'], 403);
         }*/
         $user = User::findOrFail($id);
@@ -302,7 +302,7 @@ public function login(Request $request)
 
         // Delete the doctor record
         $user->delete();
-        return response()->json(['message' => ' account deleted succesfully'], 401);
+        return response()->json(['message' => ' account deleted succesfully'], 200);
     }
 
     public function getUserPosts(User $user)
@@ -311,8 +311,8 @@ public function login(Request $request)
         $posts = Post::where('user_id', $user->id)->get();
         $posts->map(function($post) {
             $post->image_url = $post->attachments ? asset('storage/' . $post->attachments) : null;
-            $post->user->profile_picture_url = $post->user->profile_picture 
-            ? asset('storage/' . $post->user->profile_picture) 
+            $post->user->profile_picture_url = $post->user->profile_picture
+            ? asset('storage/' . $post->user->profile_picture)
             : null;
             return $post;
         });
@@ -331,7 +331,7 @@ public function login(Request $request)
             return response()->json(['message' => 'Logout successful'], 200);
 
             }else{
-        
+
 
         // Return a success response
         return response()->json(['message' => 'you are not authenticated'], 200);
@@ -341,5 +341,5 @@ public function login(Request $request)
 
 
 
-   
+
 }

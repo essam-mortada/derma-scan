@@ -1,12 +1,21 @@
-@extends('layouts.app')
-@extends('layouts.navbar')
-@section('content')
+@if (Auth::user()->status=='pending' || Auth::user()->status=='declined')
+<link href="{{asset('assets/vendor/bootstrap/css/bootstrap.min.css')}}" rel="stylesheet">
+<div class="container text-center">
+    <img width="60%" src="{{asset('assets/img/not-found.jpg')}}" alt="">
+    <form action="{{route('logout')}}" method="POST">
+        @csrf
+        <button type="submit" class="btn btn-danger">Logout</button>
+    </form>
+</div>
+@else
+@include('layouts.navbar')
+
 <div class="container">
-    <div class="col-md-6">    
+    <div class="col-md-6">
 <h1>Create Post</h1>
     <form action="{{ route('posts.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
-    
+
         <div class="form-group">
             <label for="post_text">Post Text</label>
             <textarea name="post_text" class="form-control" rows="4" required>{{ old('post_text') }}</textarea>
@@ -52,4 +61,5 @@
 @endsection
 
 
-@extends( 'layouts.footer' )
+@include( 'layouts.footer' )
+@endif

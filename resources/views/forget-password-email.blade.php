@@ -1,9 +1,9 @@
-@extends('layouts.app')
+<link rel="stylesheet" href="{{asset('assets/vendor/bootstrap/css/bootstrap.min.css')}}">
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('Reset Password') }}</div>
+            <div class="card my-5">
+                <div style="background-color: #1977cc; color:white;" class="card-header">{{ __('Reset Password') }}</div>
 
                 <div class="card-body">
                     @if (session('status'))
@@ -26,7 +26,7 @@
                             @enderror
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group mt-3">
                             <button type="submit" class="btn btn-primary">
                                 {{ __('Send Password Reset Link') }}
                             </button>

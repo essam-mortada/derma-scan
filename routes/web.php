@@ -1,14 +1,19 @@
 <?php
 
 use App\Http\Controllers\adminController;
+use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\chatbotController;
 use App\Http\Controllers\commentController;
 use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\notificationController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\predictController;
 use App\Http\Controllers\userController;
 use Illuminate\Support\Facades\Route;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+Route::get('/result', function () {
+    return view('prediction_result');
+});
 // In your routes/web.php file
 
 Route::get('/', function () {
@@ -16,10 +21,15 @@ Route::get('/', function () {
 })->name('welcome');
 Route::group(['middleware' => 'auth'],function () {
     Route::get('/home', 'App\Http\Controllers\userController@showHome')->name('home');
+// Catch-all route for undefined routes
+Route::fallback(function () {
+    return response()->view('not-found', [], 404);
+});
 
     Route::post('/logout', 'App\Http\Controllers\userController@logout')->name('logout');
 
-    
+    Route::get('/community', 'App\Http\Controllers\userController@showCommunity')->name('community');
+
 /////////////////////////////////////////////////////////////////////////////////////////////////
 // authorized user
 /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -29,7 +39,15 @@ Route::put('/profile/{user}', [userController::class, 'update'])->name('users.up
 Route::get('/change-password/profile/{user}', [UserController::class, 'showChangePasswordForm'])->name('password.change.form');
 Route::post('/change-password/{user}', [UserController::class, 'changePassword'])->name('password.change');
 
+Route::get('/predict', [predictController::class, 'showPredictView'])->name('predict.index');
+Route::get('/predict.', [predictController::class, 'showPredictCursoul'])->name('predict.cursoul');
+Route::get('/predict/form', [predictController::class, 'showPredictForm'])->name('predict.form');
+Route::post('/predict', [predictController::class, 'predict'])->name('predict');
 
+Route::get('/make-appointment', [AppointmentController::class, 'create'])->name('appointments.from');
+Route::post('/make-appointment', [AppointmentController::class, 'store'])->name('appointments.store');
+
+Route::get('/all-appointments/{userId}', [AppointmentController::class, 'userAppointments'])->name('appointments.user');
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -58,6 +76,20 @@ Route::post('admin/comments/{comment}', [adminController::class, 'deleteComment'
 Route::get('/add/admin', 'App\Http\Controllers\adminController@showAddAdminForm')->name('add-admin');
 Route::post('/add/admin', 'App\Http\Controllers\adminController@addAdmin')->name('add-admin-post');
 
+
+Route::get('/admin/clinics', [adminController::class, 'indexClinic'])->name('clinics.index');
+Route::get('/admin/clinics/create', [adminController::class, 'createClinic'])->name('clinics.create');
+Route::post('admin/clinics/create', [adminController::class, 'storeClinic'])->name('clinics.store');
+
+Route::get('/admin/clinics/show/{clinic}', [adminController::class, 'showClinic'])->name('clinics.show');
+Route::get('/admin/clinics/edit/{clinic}', [adminController::class, 'editClinic'])->name('clinics.edit');
+Route::post('admin/clinics/update{clinic}', [adminController::class, 'updateClinic'])->name('clinics.update');
+Route::delete('admin/clinics/destroy/{clinic}', [adminController::class, 'destroyClinic'])->name('clinics.destroy');
+
+
+Route::get('/admin/appointments', [adminController::class, 'showAppointments'])->name('admin.appointments');
+Route::post('admin/appointments/destroy/{appointment}', [adminController::class, 'deleteAppointment'])->name('appointments.delete');
+
 ///////////////////////////////////////////////////////////////////
 ///posts///
 ///////////////////////////////////////////////////////////////////
@@ -82,6 +114,8 @@ Route::post('/comment/{comment}', [commentController::class, 'destroy'])->name('
 Route::get('/comment/{comment}/edit', [commentController::class, 'edit'])->name('comment.edit');
 Route::put('/comment/{comment}', [commentController::class, 'update'])->name('comment.update');
 
+Route::get('/notifications', [notificationController::class, 'index'])->name('notifications.index');
+Route::post('/notifications/read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //chatbot
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -101,4 +135,7 @@ Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestF
 Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::get('password/reset/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
 Route::post('password/reset', [ForgotPasswordController::class, 'reset'])->name('password.update');
+
+
+
 

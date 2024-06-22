@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\appointment;
+use App\Models\clinic;
 use App\Models\comment;
 use App\Models\Post;
 use App\Models\User;
@@ -36,12 +38,16 @@ class adminController extends Controller
         $users= User::all();
         return view('admin.users', compact('users'));
     }
-
+    public function showAppointments()
+    {
+        $appointments= appointment::all();
+        return view('admin.appointments', compact('appointments'));
+    }
     public function showDoctors()
     {
-    
+
         $users = user::where('status','pending')->get();
-    
+
         return view('admin.doctor-requests', compact('users'));
     }
     public function showChangePasswordForm()
@@ -50,9 +56,9 @@ class adminController extends Controller
     }
     public function deletePost(Post $post)
     {
-       
-    $post = Post::findOrFail($post->id); 
-    
+
+    $post = Post::findOrFail($post->id);
+
 
     if ($post->attachments && file_exists(asset('storage/' . $post->attachments))) {
         unlink(asset('storage/'.  $post->attachments));
@@ -61,16 +67,16 @@ class adminController extends Controller
     // Delete the doctor record
     $post->delete();
     return redirect()->back()->with('success', 'post deleted successfully.');
-    }  
+    }
 
 
     public function deleteComment(comment $comment)
     {
-       
-    $comment = comment::findOrFail($comment->id); 
+
+    $comment = comment::findOrFail($comment->id);
     $comment->delete();
     return redirect()->back()->with('success', 'comment deleted successfully.');
-    }  
+    }
 
 
     public function deleteUser(Request $request, $id)
@@ -143,7 +149,7 @@ class adminController extends Controller
         $admin->display_name = $request->display_name;
         $admin->permissions = $request->permissions;
         $admin->gender = $request->gender;
-        $admin->profile_picture = $profilePicturePath; 
+        $admin->profile_picture = $profilePicturePath;
         $admin->password = Hash::make($request->password);
         $admin->save();
 
@@ -152,7 +158,7 @@ class adminController extends Controller
         return redirect()->route('admin.home')->with('success', 'Registration successful. Please login.');
     }
 
-    
+
     public function update(Request $request, User $user)
     {
         $validator= Validator::make($request->all() ,[
@@ -181,11 +187,11 @@ class adminController extends Controller
                 $user->profile_picture = $profilePicturePath;
                 $user->save();
                 }
-      
-        
-        
-    
-        return redirect()->route('home');    
+
+
+
+
+        return redirect()->route('home');
     }
 
 
@@ -193,15 +199,77 @@ class adminController extends Controller
     public function approve(User $user)
     {
         $user->update(['status' => 'approved']);
-    
+
         return redirect()->back()->with('success', 'User approved successfully.');
     }
-    
+
     public function decline(User $user)
     {
         $user->update(['status' => 'declined']);
-    
+
         return redirect()->back()->with('success', 'User declined successfully.');
     }
-    
+
+
+    // clinics
+
+
+    public function indexClinic()
+    {
+        $clinics = clinic::all();
+        return view('clinics.index', compact('clinics'));
+    }
+
+    public function createClinic()
+    {
+        return view('clinics.create');
+    }
+
+    public function storeClinic(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'location' => 'required|string|max:255',
+            'speciality' => 'required|string|max:255',
+        ]);
+
+        Clinic::create($request->all());
+        return redirect()->route('clinics.index')->with('success', 'Clinic created successfully.');
+    }
+
+    public function showClinic(Clinic $clinic)
+    {
+        return view('clinics.show', compact('clinic'));
+    }
+
+    public function editClinic(Clinic $clinic)
+    {
+        return view('clinics.edit', compact('clinic'));
+    }
+
+    public function updateClinic(Request $request, Clinic $clinic)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'location' => 'required|string|max:255',
+            'speciality' => 'required|string|max:255',
+        ]);
+
+        $clinic->update($request->all());
+        return redirect()->route('clinics.index')->with('success', 'Clinic updated successfully.');
+    }
+
+    public function destroyClinic(Clinic $clinic)
+    {
+        $clinic->delete();
+        return redirect()->route('clinics.index')->with('success', 'Clinic deleted successfully.');
+    }
+
+    public function deleteAppointment(appointment $appointment)
+    {
+
+    $appointment = appointment::findOrFail($appointment->id);
+    $appointment->delete();
+    return redirect()->back()->with('success', 'comment deleted successfully.');
+    }
 }

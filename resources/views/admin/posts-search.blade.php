@@ -1,6 +1,18 @@
-@extends('layouts.app')
-@extends('layouts.admin-navbar')
-@section('content')
+@auth
+
+
+@if (Auth::user()->type=='user' || Auth::user()->type=='doctor')
+<link href="{{asset('assets/vendor/bootstrap/css/bootstrap.min.css')}}" rel="stylesheet">
+<div class="container text-center">
+    <img width="60%" src="{{asset('assets/img/not-found.jpg')}}" alt="">
+    <form action="{{route('logout')}}" method="POST">
+        @csrf
+        <button type="submit" class="btn btn-danger">Logout</button>
+    </form>
+</div>
+@else
+@include('layouts.admin-navbar')
+<link rel="stylesheet" href="{{asset('assets/vendor/bootstrap/css/bootstrap.min.css')}}">
 @if (isset($query))
     <h2>Search results for: {{ $query }}</h2>
 @endif
@@ -34,8 +46,8 @@
 
   </table>
 
-@endsection
 
-
+@endif
+@endauth
 
 

@@ -7,38 +7,66 @@ use App\Http\Controllers\Controller;
 use App\Models\comment;
 use App\Models\Post;
 use App\Models\User;
+use App\Models\notification;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str; 
+use Illuminate\Support\Str;
 
 
 class userController extends Controller
 {
     public function showHome()
-{
-    if (Auth::check()) {
-        $posts = Post::orderBy('created_at', 'desc')->get();
-        $comments = comment::all();
-        $users = User::all();
-        $user = Auth::user();
-        if ($user->type == 'user') {
-            return view('home',compact('posts','comments','user'));
-        } elseif ($user->type == 'doctor') {
-            return view('home',compact('posts','comments','user'));
-        } elseif ($user->type == 'admin') {
-            return view('admin.admin-home',compact('posts','users'));
-        } 
-        
-        else{
+    {
+        // Check if the user is authenticated
+        if (!Auth::check()) {
             return redirect()->route('login');
         }
-    } else {
+
+        // Fetch unread notifications for the authenticated user
+        $notifications = Notification::where('user_id', Auth::id())
+            ->unread()
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Fetch posts, comments, and users
+        $posts = Post::orderBy('created_at', 'desc')->get();
+        $comments = Comment::all();
+        $users = User::all();
+        $user = Auth::user();
+
+        // Pass notifications to the view based on user type
+        if ($user->type == 'user' || $user->type == 'doctor') {
+            return view('welcome', compact('posts', 'comments', 'user', 'notifications'));
+        } elseif ($user->type == 'admin') {
+            return view('admin.admin-home', compact('posts', 'users', 'notifications'));
+        }
+
         return redirect()->route('login');
     }
-}
 
+    public function showCommunity()
+    {
+        // Check if the user is authenticated
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        // Fetch unread notifications for the authenticated user
+        $notifications = Notification::where('user_id', Auth::id())
+        ->where('is_read', 0)
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+        // Fetch posts, comments, and users
+        $posts = Post::orderBy('created_at', 'desc')->get();
+        $comments = Comment::all();
+        $users = User::all();
+        $user = Auth::user();
+
+        return view('community', compact('posts', 'comments', 'user', 'notifications'));
+    }
     /**
      * Display the registration form.
      *
@@ -52,7 +80,7 @@ class userController extends Controller
     {
         return view('login');
     }
-    
+
     /**
      * Handle user registration.
      *
@@ -100,10 +128,10 @@ class userController extends Controller
             $medicalLicensePath = $medicalLicense->storeAs('medical_licenses', $medicalLicenseName,'public');
         }
 
-        
-            
-        
-        
+
+
+
+
         // Create a new user
         $user = new User();
         $user->name = $request->name;
@@ -120,7 +148,7 @@ class userController extends Controller
         $user->api_token = Str::random(60);
         $user->save();
 
-       
+
         return redirect()->route('login')->with('success', 'Registration successful. Please login.');
     }
 
@@ -189,7 +217,7 @@ class userController extends Controller
     {
         $validator= Validator::make($request->all() ,[
             'name' => 'required|string|max:255|alpha_dash',
-            'email' => 'required|string|email|max:255|exists:users',            
+            'email' => 'required|string|email|max:255|exists:users',
             'display_name' => 'required|string|max:20|alpha_dash',
             'profile_picture' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -214,27 +242,27 @@ class userController extends Controller
                 $user->profile_picture = $profilePicturePath;
                 $user->save();
                 }
-    
-           
-        
-            
-        
-        
-        
-    
-        return redirect()->route('users.show',$user);    
+
+
+
+
+
+
+
+
+        return redirect()->route('users.show',$user);
     }
 
-   
+
 
 
     public function search(Request $request)
     {
         $query = $request->input('query');
-    
+
         $users = user::where('display_name', 'like', "%{$query}%")
             ->paginate(10);
-    
+
         return view('admin.users', compact('users', 'query'));
     }
 

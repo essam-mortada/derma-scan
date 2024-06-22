@@ -1,17 +1,32 @@
-@extends('layouts.app')
-@extends('layouts.admin-navbar')
-@section('content')
+@auth
+
+
+@if (Auth::user()->type=='user' || Auth::user()->type=='doctor')
+<link href="{{asset('assets/vendor/bootstrap/css/bootstrap.min.css')}}" rel="stylesheet">
+<div class="container text-center">
+    <img width="60%" src="{{asset('assets/img/not-found.jpg')}}" alt="">
+    <form action="{{route('logout')}}" method="POST">
+        @csrf
+        <button type="submit" class="btn btn-danger">Logout</button>
+    </form>
+</div>
+@else
+<div class="row">
+    <div class="col-2">
+@include('layouts.admin-navbar')
+</div>
+<div class="col-10 my-4" style="left: 0">
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8 py-5">
             <div class="card">
-                <div class="card-header">{{ __('edit') }}</div>
+                <div class="card-header">{{ __('edit profile') }}</div>
 
                 <div class="card-body">
                     <form method="POST" action="{{ route('admin.update',$user->id) }}" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
-                        <div class="form-group row">
+                        <div class="form-group row mt-2">
                             <label for="name" class="col-md-4 col-form-label text-md-right">{{ __('Name') }}</label>
 
                             <div class="col-md-6">
@@ -25,7 +40,7 @@
                             </div>
                         </div>
 
-                        <div class="form-group row">
+                        <div class="form-group row mt-2">
                             <label for="email" class="col-md-4 col-form-label text-md-right">{{ __('E-Mail Address') }}</label>
 
                             <div class="col-md-6">
@@ -39,10 +54,10 @@
                             </div>
                         </div>
 
-                      
 
-                        
-                        <div class="form-group row">
+
+
+                        <div class="form-group row mt-2">
                             <label for="name" class="col-md-4 col-form-label text-md-right">{{ __('display_name') }}</label>
 
                             <div class="col-md-6">
@@ -55,9 +70,9 @@
                                 @enderror
                             </div>
                         </div>
-                  
-                   
-                    <div class="form-group row">
+
+
+                    <div class="form-group row mt-2">
                         <label for="profile_picture" class="col-md-4 col-form-label text-md-right">{{ __('Profile Picture') }}</label>
 
                         <div class="col-md-6">
@@ -71,10 +86,10 @@
                         </div>
                     </div>
 
-             
-                    
 
-                        <div class="form-group row mb-0">
+
+
+                        <div class="form-group row mb-0 mt-2">
                             <div class="col-md-6 offset-md-4">
                                 <button type="submit" class="btn btn-primary">
                                     {{ __('edit') }}
@@ -87,4 +102,6 @@
         </div>
     </div>
 </div>
-@endsection
+</div>
+@endif
+@endauth

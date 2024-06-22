@@ -1,12 +1,24 @@
-@extends('layouts.app')
-@extends('layouts.navbar')
-@section('content')
-<div class="container">
-    <div class="col-md-6">
+@if (Auth::user()->status=='pending' || Auth::user()->status=='declined')
+<link href="{{asset('assets/vendor/bootstrap/css/bootstrap.min.css')}}" rel="stylesheet">
+<div class="container text-center">
+    <img width="60%" src="{{asset('assets/img/not-found.jpg')}}" alt="">
+    <form action="{{route('logout')}}" method="POST">
+        @csrf
+        <button type="submit" class="btn btn-danger">Logout</button>
+    </form>
+</div>
+@else
+@include('layouts.navbar')
 
-    
-    <h1>edit Post</h1>
-    <form action="{{ route('posts.update',$post->id) }}" method="POST" enctype="multipart/form-data">
+<div class="container">
+    <div class="col-md-6 m-auto my-5">
+
+
+        <div class="card" >
+            <div class="card-header" style="background-color: #1977cc; color:white">{{ __('edit post') }}</div>
+
+            <div class="card-body">
+        form action="{{ route('posts.update',$post->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method( 'PUT' )
         <div class="form-group">
@@ -25,24 +37,15 @@
             @enderror
         </div>
 
-     
 
-        <div class="form-group">
-            <label for="privacy">Privacy</label>
-            <select name="privacy"  class="form-control" required>
-                <option value="public">Public</option>
-                <option value="specialists_only">Specialists Only</option>
-            </select>
-            @error('privacy')
-                <div class="text-danger">{{ $message }}</div>
-            @enderror
-        </div>
 
-        <button type="submit" class="btn btn-primary">edit</button>
+
+        <button type="submit" class="btn mt-3 px-4"  style="background-color: #1977cc; color:white;" >edit</button>
     </form>
 </div>
 </div>
-@endsection
+</div>
+</div>
 
-
-@extends( 'layouts.footer' )
+@include('layouts.footer')
+@endif

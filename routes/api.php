@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\AppointmentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UserController;
@@ -43,7 +44,7 @@ Route::get('/user', function (Request $request) {
     Route::get('/posts/upvotes/{postId}', [PostController::class, 'getUpvotes']);
     Route::get('/posts/downvotes/{postId}', [PostController::class, 'getDownvotes']);
 
-    
+
     // comment endpoints
     Route::post('/comments/create', [CommentController::class, 'store']);
     Route::post('/comments/update/{comment}', [CommentController::class, 'update']);
@@ -51,3 +52,7 @@ Route::get('/user', function (Request $request) {
     Route::get('comments/post/{postId}', [CommentController::class, 'showCommentsByPost']);
 
 
+    // appointment endpoints
+    Route::get('clinics', [AppointmentController::class, 'getClinics']);
+    Route::post('appointments', [AppointmentController::class, 'storeAppointment']); 
+    Route::get('user/appointments/{userId}', [AppointmentController::class, 'getUserAppointments']);

@@ -1,81 +1,124 @@
-@extends('layouts.app')
-@extends('layouts.navbar')
-@section('content')
-
+@if (Auth::user()->status=='pending' || Auth::user()->status=='declined')
+<link href="{{asset('assets/vendor/bootstrap/css/bootstrap.min.css')}}" rel="stylesheet">
+<div class="container text-center">
+    <img width="60%" src="{{asset('assets/img/not-found.jpg')}}" alt="">
+    <form action="{{route('logout')}}" method="POST">
+        @csrf
+        <button type="submit" class="btn btn-danger">Logout</button>
+    </form>
+</div>
+@else
+@include('layouts.navbar')
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
-<div class="container bootstrap snippets bootdey">
-<div class="col-md-8">
+<link rel="stylesheet" href="{{asset('assets/css/post.css')}}">
+
+<div class="container bootstrap snippets bootdey mt-5 ">
+<div class="col-md-8 m-auto ">
   <div class="box box-widget">
     <div class="box-header with-border">
       <div class="user-block">
-        @if ($post->user->id ==  Auth::User()->id)
-                                                            
-                                                        
-        <form class="float-end" action="{{route("posts.destroy", $post->id)}}" method="post">
-            @csrf
-            <button type="submit" class="btn btn-danger">delete </button>
-        </form>
-        <a class="btn btn-warning float-end mx-3" href="{{route("posts.edit",$post->id)}}">edit</a>
-        @endif
-        <img class="img-circle" src="{{asset('storage/'.$post->user->profile_picture)}}" alt="User Image">
-        <span class="username"><a href="{{route('users.show',$post->user->id)}}">{{$post->user->display_name}} @if ($post->user->type=="doctor") <i class="fa-solid fa-user-doctor"></i> @endif</a></span>
+        @if ($post->user->profile_picture==null && $post->user->gender== "male" )
+                <img src="{{asset('assets/img/male-profile.png')}}" alt="" >
+
+                @elseif ($post->user->profile_picture==null && $post->user->gender=="female")
+                <img src="{{asset('assets/img/female-profile.png')}}" alt="" >
+                @else
+                <img src="{{asset("storage/".$post->user->profile_picture)}}" alt="" >
+                @endif
+        <span class="username"><a href="#">{{$post->user->display_name}}</a></span>
         <span class="description">{{$post->created_at}}</span>
       </div>
-      
-    </div>
+      <div class="box-tools">
+        @if (Auth::user()->id==$post->user->id)
+        <div class="pull-right social-action dropdown">
+                <button class="btn  dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 
-    <div class="box-body" style="display: block;">
-        @if ($post->attachments)
-            
-      <img style="width: 50%" class="img-responsive pad" src="{{$postImage}}" alt="Photo">
+                </button>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="{{route('posts.edit',$post->id)}}">Edit</a></li>
+                  <li> <form action="{{route('posts.delete',$post->id)}}" method="POST">
+                    @csrf
+                    <button class="dropdown-item"  type="submit">Delete</button>
+
+                </form>
+                </li>
+                </ul>
+
+        </div>
+        @endif
+      </div>
+    </div>
+    <div class="box-body">
+      <p>{{$post->post_text}}</p>
+
+
+      @if ($post->attachments!=null)
+      <div class="attachment-block clearfix text-center">
+
+        <img class="attachment-img" src="{{asset("storage/".$post->attachments)}}" alt="Attachment Image">
+
+      </div>
       @endif
-      <p>{{ $post->post_text }}</p>
       <div class="row">
-      <form action="{{route("posts.upvote", $post->id)}}" method="post">
-        @csrf
-        <button type="submit" class="btn btn-default btn-xs"><i class="fa fa-thumbs-o-up"></i> Like</button>
-      </form>
+        <div class="col-lg-2 col-4">
+            <form action="{{route('posts.upvote',$post->id)}}" method="POST">@csrf
+              <button type="submit" class="btn btn-default btn-xs"><i class="fa fa-thumbs-o-up"></i> like {{$post->upvotes}}</button>
+            </form>
+          </div>
+        <div class=" col-lg-2  col-5">
+          <form action="{{route('posts.downvote',$post->id)}}" method="POST">@csrf
+            <button type="submit" class="btn btn-default btn-xs"><i class="fa fa-thumbs-o-down"></i> dislike {{$post->downvotes}}</button>
+          </form>
+        </div>
 
-      <form action="{{route("posts.downvote", $post->id)}}" method="post">
-      <button type="submit" class="btn btn-default btn-xs"><i class="fa fa-thumbs-o-down"></i> disLike</button>
-    </form>
+      </div>
     </div>
-      <span class="pull-right text-muted">{{ $post->upvotes }} likes </span>
-      <span class="pull-right text-muted mx-2">{{ $post->downvotes }} dislikes </span>
+    </div>
+@foreach ($post->comments as $comment)
 
-    </div>
-    <div class="box-footer box-comments" style="display: block;">
-        @foreach ($comments as $comment)
-            
-        
+    <div class="box-footer box-comments">
       <div class="box-comment">
-        <img class="img-circle img-sm" src="{{asset("storage/".$comment->user->profile_picture)}}" alt="User Image">
-        <div class="comment-text">
-            <span class="username"><a href="{{route('users.show',$comment->user->id)}}">{{$comment->user->display_name}} @if ($comment->user->type=="doctor") <i class="fa-solid fa-user-doctor"></i> @endif</a></span>
+        @if ($comment->user->profile_picture==null && $comment->user->gender== "male" )
 
-          <span class="text-muted pull-right">{{$comment->created_at}}</span>
+        <img class="img-circle img-sm"src="{{asset('assets/img/male-profile.png')}}" alt="" >
+
+        @elseif ($comment->user->profile_picture==null && $comment->user->gender=="female")
+        <img class="img-circle img-sm" src="{{asset('assets/img/female-profile.png')}}" alt="" >
+        @else
+        <img class="img-circle img-sm" src="{{asset("storage/".$comment->user->profile_picture)}}" alt="" >
+        @endif
+        <div class="comment-text">
+          <span class="username">
+          {{$comment->user->display_name}}<br>
+          <span class="text-muted" style="font-size: 10px">{{$comment->created_at}}</span>
           </span>
-          {{$comment->comment_content}}
+         {{$comment->comment_content}}
         </div>
       </div>
-      @endforeach
+
     </div>
-    <div class="box-footer" style="display: block;">
-      <form action="{{route('comment.store')}}" method="post">
+    @endforeach
+    <div class="box-footer mb-5">
+      <form action="{{route('comment.store')}}" method="POST">
         @csrf
-        <input type="hidden" name="post_id" value="{{ $post->id }}">
-        <img class="img-responsive img-circle img-sm" src="{{asset('storage/'.Auth::user()->profile_picture)}}" alt="Alt Text">
-        <div class="img-push row">
-          <input type="text" name="comment_content" class="form-control input-sm " placeholder="make comment">{{ old('comment_content') }}</input>
-          @error('comment_content')
-          <div class="text-danger">{{ $message }}</div>
-        @enderror
+        @if (Auth::user()->profile_picture==null && Auth::user()->gender== "male" )
+
+        <img class="img-responsive img-circle img-sm"src="{{asset('assets/img/male-profile.png')}}" alt="" >
+
+        @elseif (Auth::user()->profile_picture==null && Auth::user()->gender=="female")
+        <img class="img-responsive img-circle img-sm" src="{{asset('assets/img/female-profile.png')}}" alt="" >
+        @else
+        <img class="img-responsive img-circle img-sm" src="{{asset("storage/".Auth::user()->profile_picture)}}" alt="" >
+        @endif
+        <div class="img-push">
+          <input type="text" name="comment_content" class="form-control  input-sm" placeholder="write a comment">
+          <input type="hidden" name="post_id" value="{{$post->id}}">
         </div>
       </form>
     </div>
   </div>
 </div>
 </div>
-@endsection
 
-@extends( 'layouts.footer' )
+@include( 'layouts.footer' )
+@endif

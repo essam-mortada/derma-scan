@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
+use App\Models\notification;
+use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -16,7 +18,7 @@ class CommentController extends Controller
         return response()->json($comments);
     }
 
-   
+
 
     public function store(Request $request)
     {
@@ -32,10 +34,10 @@ class CommentController extends Controller
         if ($validator->fails()) {
             // Get all the error messages as an array
             $errors = $validator->errors()->all();
-            
+
             // Join the error messages into a single string, separated by commas (or any other separator you prefer)
             $errorMessage = implode(', ', $errors);
-            
+
             // Return the single error message
             return response()->json(['message' => $errorMessage], 400);
         }
@@ -44,7 +46,19 @@ class CommentController extends Controller
         $comment->post_id = $request->post_id;
         $comment->user_id = $user->id;
         $comment->save();
+// Get the post owner
+        $post = Post::find($request->post_id);
+        $postOwner = $post->user;
 
+// Create a notification for the post owner
+        notification::create([
+        'user_id' => $postOwner->id,
+        'title' => 'New Comment on Your Post',
+        'message' =>Auth::guard('api')->user()->name . ' commented on your post.',
+        'type' => 'comment',
+        'is_read' => false,
+        'created_at' => now(config('app.timezone')),
+        ]);
         $comment->load('post', 'user');
 
         return response()->json(['message' => 'Comment created successfully','data'=>$comment]);
@@ -52,7 +66,7 @@ class CommentController extends Controller
     }
 
     public function update(Request $request, Comment $comment)
-    { 
+    {
         $user = Auth::guard('api')->user();
 
         if (!$user) {
@@ -64,15 +78,15 @@ class CommentController extends Controller
         $validator = Validator::make($request->all(), [
             'comment_content' => 'required|string',
         ]);
-            
-        
+
+
         if ($validator->fails()) {
             // Get all the error messages as an array
             $errors = $validator->errors()->all();
-            
+
             // Join the error messages into a single string, separated by commas (or any other separator you prefer)
             $errorMessage = implode(', ', $errors);
-            
+
             // Return the single error message
             return response()->json(['message' => $errorMessage], 400);
         }

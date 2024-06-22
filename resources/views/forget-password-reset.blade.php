@@ -1,4 +1,4 @@
-@extends('layouts.app')
+<link rel="stylesheet" href="{{asset('assets/vendor/bootstrap/css/bootstrap.min.css')}}">
 
 <div class="container">
     <div class="row justify-content-center">
