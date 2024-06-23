@@ -11,9 +11,10 @@
 @include('layouts.navbar')
 <link rel="stylesheet" href="{{asset('assets/css/predict-result.css')}}">
     <h1>Prediction Result</h1>
-    <h2 class="text-center">take a coffee while we process your image!</h2>
 
         <div id="container">
+            <h2 class="text-center">take a coffee while we process your image!</h2>
+            <div class="coffee-corner m-auto">
             <div class="steam" id="steam1"> </div>
             <div class="steam" id="steam2"> </div>
             <div class="steam" id="steam3"> </div>
@@ -27,17 +28,25 @@
             </div>
             <div id="shadow"></div>
         </div>
-
+        </div>
     @if(session('error'))
         <p style="color: red;">{{ session('error') }}</p>
     @endif
 
     @if(isset($prediction))
         <p>Predicted Class Label: {{ $prediction['predicted_class_label'] }}</p>
-        <p>Predicted Class Description: {{ $prediction['predicted_class_description'] }}</p>
         <p>Confidence: {{ $prediction['confidence'] }}</p>
     @endif
 
     <a href="{{ url()->previous() }}">Go Back</a>
 
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+    setTimeout(function() {
+        var container = document.getElementById("container");
+        container.classList.add("hidden");
+    }, 2000);
+});
+  </script>
 @endif

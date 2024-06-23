@@ -42,7 +42,7 @@ Route::post('/change-password/{user}', [UserController::class, 'changePassword']
 Route::get('/predict', [predictController::class, 'showPredictView'])->name('predict.index');
 Route::get('/predict.', [predictController::class, 'showPredictCursoul'])->name('predict.cursoul');
 Route::get('/predict/form', [predictController::class, 'showPredictForm'])->name('predict.form');
-Route::post('/predict', [predictController::class, 'predict'])->name('predict');
+Route::post('/predict/post', [predictController::class, 'predict'])->name('predict');
 
 Route::get('/make-appointment', [AppointmentController::class, 'create'])->name('appointments.from');
 Route::post('/make-appointment', [AppointmentController::class, 'store'])->name('appointments.store');

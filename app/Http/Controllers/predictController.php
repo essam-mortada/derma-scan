@@ -21,7 +21,7 @@ class predictController extends Controller
     {
         // Validate the request
         $request->validate([
-            'file' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'file' => 'required|image|mimes:jpeg,jpg|max:2048'
         ]);
 
         // Check if the file is present in the request

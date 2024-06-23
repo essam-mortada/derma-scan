@@ -59,7 +59,7 @@ background-color: white;
                   <li> <form action="{{route('notifications.markAsRead')}}" method="POST">
                     @csrf
                     <input type="hidden" name="id" value="{{$notification->id}}">
-                    <button type="submit" class="dropdown-item" href="#">{{$notification->message}}</button></form>
+                    <button type="submit" class="dropdown-item" href="#">{{$notification->message}} <br> <small>{{$notification->created_at}}</small> </button></form>
                 </li>
                   @endforeach
 

@@ -54,8 +54,13 @@
                 @csrf
                 <label for="images" class="drop-container" id="dropcontainer">
                     <span class="drop-title">Upload image here</span>
-                    
-                    <input class="form-control" type="file" id="images" accept="image/*" required>
+
+                    <input class="form-control" type="file" name="file"  required>
+                    @error('file')
+                            <span class="invalid-feedback" role="alert">
+                           <strong>{{ $message }}</strong>
+                           </span>
+                       @enderror
                 </label>
                 <div class="modal-footer col-md-6 m-auto">
                     <button type="submit" class="btn-primary form-control ">Upload File</button>
