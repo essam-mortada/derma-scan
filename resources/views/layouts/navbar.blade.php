@@ -9,7 +9,7 @@
   <meta content="" name="keywords">
 
   <!-- Favicons -->
-  <link href="{{asset('assets/img/favicon.png')}}" rel="icon">
+  <link href="{{asset('assets/img/letter-d_9546886.png')}}" rel="icon">
   <link href="{{asset('assets/img/apple-touch-icon.png')}}" rel="apple-touch-icon">
 
   <!-- Fonts -->
@@ -69,6 +69,7 @@
             <li><a href="{{route('community')}}">community</a></li>
             <li><a href="{{route('chatbot')}}">Chatbot</a></li>
             <li><a href="{{route('users.show',Auth::user()->id)}}">profile</a></li>
+            <li><a href="{{route('users.diagnosis')}}">diagnosis history</a></li>
             @endauth
             <li class="dropdown"><a href="#"> <i style="font-size: 25px" class="bi bi-person-fill"></i></a>
                 <ul>
@@ -92,7 +93,7 @@
           <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
         </nav>
 
-        <a class="cta-btn d-none d-sm-block" href="{{route('predict.index')}}">Skin Check</a>
+        <a class="cta-btn  d-sm-block" href="{{route('predict.index')}}">Skin Check</a>
 
       </div>
 

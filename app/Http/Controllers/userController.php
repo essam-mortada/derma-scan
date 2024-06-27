@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\comment;
+use App\Models\diagnosis_histories;
 use App\Models\Post;
 use App\Models\User;
 use App\Models\notification;
@@ -91,7 +92,7 @@ class userController extends Controller
     {
         // Validate user input
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255|alpha_dash',
+            'name' => 'required|string|max:255|',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed|alpha_dash|unique:users',
             'display_name' => 'required|string|max:20|alpha_dash',
@@ -179,7 +180,7 @@ class userController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect()->route('login');
+        return redirect()->route('home');
     }
 
 
@@ -298,7 +299,12 @@ class userController extends Controller
         return redirect()->route('password.change.form',$user->id)->with('status', 'Password changed successfully');
     }
 
-
+    public function getDiagnosisHistory(){
+        $diagnosis = diagnosis_histories::where('user_id', Auth::id())
+        ->orderBy('created_at', 'desc')
+        ->get();
+        return view('diagnosis-history',compact('diagnosis'));
+    }
 
 }
 

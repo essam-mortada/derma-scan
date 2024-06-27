@@ -43,12 +43,14 @@ Route::get('/predict', [predictController::class, 'showPredictView'])->name('pre
 Route::get('/predict.', [predictController::class, 'showPredictCursoul'])->name('predict.cursoul');
 Route::get('/predict/form', [predictController::class, 'showPredictForm'])->name('predict.form');
 Route::post('/predict/post', [predictController::class, 'predict'])->name('predict');
+Route::post('/diagnosis/save', [predictController::class, 'saveDiagnosis'])->name('diagnosis.save');
 
 Route::get('/make-appointment', [AppointmentController::class, 'create'])->name('appointments.from');
 Route::post('/make-appointment', [AppointmentController::class, 'store'])->name('appointments.store');
 
 Route::get('/all-appointments/{userId}', [AppointmentController::class, 'userAppointments'])->name('appointments.user');
 
+Route::get('/diagnosis-history', [userController::class, 'getDiagnosisHistory'])->name('users.diagnosis');
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //admin

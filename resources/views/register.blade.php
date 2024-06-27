@@ -98,7 +98,7 @@
                                         @enderror
                                     </div>
                                     <div class="form-group" id="medical_license_div">
-                                        <label for="medical_license">Medical License</label>
+                                        <label for="medical_license">Medical License <small>if you are a doctor</small></label>
                                         <input id="medical_license" type="file" class="form-control @error('medical_license') is-invalid @enderror" name="medical_license" value="{{ old('medical_license') }}" autocomplete="medical_license" autofocus>
                                         @error('medical_license')
                                             <span class="invalid-feedback" role="alert">

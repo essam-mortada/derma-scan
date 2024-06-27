@@ -9,7 +9,7 @@
   <meta content="" name="keywords">
 
   <!-- Favicons -->
-  <link href="{{asset('assets/img/favicon.png')}}" rel="icon">
+  <link href="{{asset('assets/img/letter-d_9546886.png')}}" rel="icon">
   <link href="{{asset('assets/img/apple-touch-icon.png')}}" rel="apple-touch-icon">
 
   <!-- Fonts -->
@@ -48,6 +48,10 @@
 </div>
 
 @else
+
+
+
+
 
 <body class="index-page">
 
@@ -88,6 +92,8 @@
         <li><a href="{{route('chatbot')}}">Chatbot</a></li>
 
             <li><a href="{{route('users.show',Auth::user()->id)}}">profile</a></li>
+            <li><a href="{{route('users.diagnosis')}}">diagnosis hsitory</a></li>
+
             @endauth
             <li class="dropdown"><a href="#"> <i style="font-size: 25px" class="bi bi-person-fill"></i></a>
                 <ul>

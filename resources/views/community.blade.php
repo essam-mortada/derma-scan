@@ -225,7 +225,7 @@ background-color: white;
                     @endif
                 </a>
                 <div class="media-body">
-                    <a href="#">
+                    <a href="{{route('users.show',$comment->user->id)}}">
                         {{$comment->user->display_name}} @if ($comment->user->type=='doctor')
                         <i class="fa-solid fa-user-doctor text-primary"></i>
                     @endif
